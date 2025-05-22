@@ -31,6 +31,17 @@ namespace AuthService.Controllers
             return Ok(new { message = "Task created successfully", task });
         }
 
+        [HttpGet("statuslist")]
+        public IActionResult GetStatusList()
+        {
+            var statusList = _db.Tasks
+                                .Select(t => t.Status.ToLower())
+                                .Distinct()
+                                .ToList();
+
+            return Ok(statusList);
+        }
+
         [HttpGet]
         public IActionResult GetTasks()
         {

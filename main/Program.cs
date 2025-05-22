@@ -10,29 +10,27 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient<IUserService, UserService>();
 
-// Add DbContext and configure the connection string for SQL Server
+
+// Configure Entity Framework with SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// Add CORS policy
+// CORS policy to allow frontend (Angular) app
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        //policy.AllowAnyOrigin()  // Allow any origin
         policy.WithOrigins("http://localhost:4200")
-
-
-              .AllowAnyMethod()  // Allow all HTTP methods
-              .AllowAnyHeader() // Allow any header
-              .AllowCredentials(); // <-- enable cookies/credentials
-
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
-// Add authentication (JWT)
+// JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -63,7 +61,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication(); // Must come before UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

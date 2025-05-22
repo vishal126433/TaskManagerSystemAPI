@@ -11,6 +11,5 @@ namespace AuthService.Data
         public DbSet<User> Users { get; set; }
         //public DbSet<Role> Roles { get; set; }
         public DbSet<TaskItem> Tasks { get; set; }
-        //public IEnumerable<object> Users { get; internal set; }
     }
 }
