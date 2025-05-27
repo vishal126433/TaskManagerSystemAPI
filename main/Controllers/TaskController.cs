@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AuthService.Models;
 using AuthService.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AuthService.Controllers
 {
@@ -15,8 +16,8 @@ namespace AuthService.Controllers
             _db = db;
         }
 
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateTask(TaskItem task)
+        [HttpPost("create/{userId}")]
+        public async Task<IActionResult> CreateTask(int userId, [FromBody] TaskItem task)
         {
             if (string.IsNullOrWhiteSpace(task.Name) ||
                 string.IsNullOrWhiteSpace(task.Description) ||
@@ -24,6 +25,8 @@ namespace AuthService.Controllers
             {
                 return BadRequest("All fields are required.");
             }
+
+            task.UserId = userId; // Assign userId from URL to task
 
             _db.Tasks.Add(task);
             await _db.SaveChangesAsync();
@@ -41,13 +44,13 @@ namespace AuthService.Controllers
 
             return Ok(statusList);
         }
-
-        [HttpGet]
-        public IActionResult GetTasks()
+        [HttpGet("{userId}")]
+        public IActionResult GetTasksByUserId(int userId)
         {
-            var tasks = _db.Tasks.ToList();
+            var tasks = _db.Tasks.Where(t => t.UserId == userId).ToList();
             return Ok(tasks);
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)

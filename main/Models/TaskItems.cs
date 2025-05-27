@@ -8,6 +8,8 @@
 
         public string Description { get; set; } = string.Empty;
 
-        public string Status { get; set; } = "pending"; 
+        public string Status { get; set; } = "pending";
+        public int UserId { get; set; }  // <-- Add this
+
     }
 }
