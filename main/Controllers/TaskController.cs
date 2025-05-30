@@ -37,13 +37,15 @@ namespace AuthService.Controllers
         [HttpGet("statuslist")]
         public IActionResult GetStatusList()
         {
-            var statusList = _db.Tasks
-                                .Select(t => t.Status.ToLower())
+            var statusList = _db.Statuses
+                                .Select(static s => s.Name.ToLower())
                                 .Distinct()
                                 .ToList();
 
             return Ok(statusList);
         }
+
+
         [HttpGet("{userId}")]
         public IActionResult GetTasksByUserId(int userId)
         {

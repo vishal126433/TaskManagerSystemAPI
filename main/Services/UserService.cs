@@ -25,10 +25,36 @@ using Microsoft.EntityFrameworkCore;
     public async Task<TokenResponse> LoginAsync(LoginRequest request)
     {
         var response = await _http.PostAsJsonAsync("https://localhost:7027/auth/login", request);
-        if (response.IsSuccessStatusCode)
-            return await response.Content.ReadFromJsonAsync<TokenResponse>();
-        throw new Exception("Invalid login credentials");
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception("Invalid login credentials");
+
+        var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
+
+        //  THIS SET-COOKIE HEADER is not passed to browser automatically
+        var setCookieHeader = response.Headers.TryGetValues("Set-Cookie", out var cookies)
+            ? cookies.FirstOrDefault()
+            : null;
+
+        // Return both token and cookie to controller
+        return new TokenResponse
+        {
+            AccessToken = tokenResponse.AccessToken,
+            RefreshToken = ExtractRefreshToken(setCookieHeader)
+        };
     }
+
+    private string ExtractRefreshToken(string setCookieHeader)
+    {
+        if (string.IsNullOrEmpty(setCookieHeader)) return null;
+
+        // Simple string extraction
+        var parts = setCookieHeader.Split(';');
+        var tokenPart = parts.FirstOrDefault(p => p.Trim().StartsWith("refreshToken="));
+        return tokenPart?.Substring("refreshToken=".Length);
+    }
+
+
 
     public async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
     {

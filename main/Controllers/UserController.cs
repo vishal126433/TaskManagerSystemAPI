@@ -28,11 +28,28 @@ namespace AuthService.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest req)
-        {
-            var token = await _userService.LoginAsync(req);
-            return Ok(token);
-        }
+public async Task<IActionResult> Login([FromBody] LoginRequest request)
+{
+    var token = await _userService.LoginAsync(request); // calls your method
+
+    // ✅ Set the cookie here using the refresh token
+    Response.Cookies.Append("refreshToken", token.RefreshToken, new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = true,
+        SameSite = SameSiteMode.None,
+        Expires = DateTime.UtcNow.AddMinutes(30),
+        Path = "/"
+    });
+
+    // ✅ Return access token to frontend
+    return Ok(new
+    {
+        accessToken = token.AccessToken,
+        role = token.Role
+    });
+}
+
 
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
@@ -60,7 +77,6 @@ namespace AuthService.Controllers
             return Ok(users);
         }
 
-        // ➕ CREATE User
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser(User user)
         {
@@ -77,7 +93,6 @@ namespace AuthService.Controllers
             return Ok(new { message = "User created successfully", user });
         }
 
-        // 📝 UPDATE User
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User updatedUser)
         {
@@ -94,7 +109,6 @@ namespace AuthService.Controllers
             return Ok(new { message = "User updated successfully", user = existingUser });
         }
 
-        // ❌ DELETE User
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
