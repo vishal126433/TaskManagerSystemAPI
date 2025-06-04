@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Azure.Core;
 using AuthService.Models;
 using AuthService.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace AuthService.Controllers
 {
@@ -78,20 +79,29 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateUser(User user)
+        public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)
         {
-            if (string.IsNullOrWhiteSpace(user.Username) ||
-                string.IsNullOrWhiteSpace(user.Email) ||
-                string.IsNullOrWhiteSpace(user.PasswordHash))
+            if (string.IsNullOrWhiteSpace(request.Username) ||
+                string.IsNullOrWhiteSpace(request.Email) ||
+                string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest("Username, Email, and PasswordHash are required.");
+                return BadRequest("Username, Email, and Password are required.");
             }
+
+            var passwordHasher = new PasswordHasher<User>();
+            var user = new User
+            {
+                Username = request.Username,
+                Email = request.Email
+            };
+            user.PasswordHash = passwordHasher.HashPassword(user, request.Password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "User created successfully", user });
+            return Ok(new { message = "User created successfully", user = new { user.Username, user.Email } });
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User updatedUser)
