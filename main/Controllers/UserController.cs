@@ -5,6 +5,7 @@ using Azure.Core;
 using AuthService.Models;
 using AuthService.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AuthService.Controllers
 {
@@ -78,6 +79,7 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
             return Ok(users);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)
         {
@@ -92,15 +94,21 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
             var user = new User
             {
                 Username = request.Username,
-                Email = request.Email
+                Email = request.Email,
+                //Role = string.IsNullOrWhiteSpace(request.Role) ? "User" : request.Role // Set role
             };
             user.PasswordHash = passwordHasher.HashPassword(user, request.Password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "User created successfully", user = new { user.Username, user.Email } });
+            return Ok(new
+            {
+                message = "User created successfully",
+                user = new { user.Username, user.Email, user.Role }
+            });
         }
+
 
 
         [HttpPut("{id}")]
