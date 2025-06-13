@@ -79,10 +79,15 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
             return Ok(users);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize]
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)
         {
+            if (!User.Identity?.IsAuthenticated ?? false)
+            {
+                return Unauthorized("❌ You are not authenticated.");
+            }
+
             if (string.IsNullOrWhiteSpace(request.Username) ||
                 string.IsNullOrWhiteSpace(request.Email) ||
                 string.IsNullOrWhiteSpace(request.Password))
@@ -91,12 +96,14 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
             }
 
             var passwordHasher = new PasswordHasher<User>();
+
             var user = new User
             {
                 Username = request.Username,
                 Email = request.Email,
-                //Role = string.IsNullOrWhiteSpace(request.Role) ? "User" : request.Role // Set role
+                // Role = string.IsNullOrWhiteSpace(request.Role) ? "User" : request.Role
             };
+
             user.PasswordHash = passwordHasher.HashPassword(user, request.Password);
 
             _context.Users.Add(user);
