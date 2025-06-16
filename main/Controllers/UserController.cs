@@ -84,6 +84,10 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)
         {
+            //if (!User.Identity?.IsAuthenticated ?? false)
+            //{
+            //    return Unauthorized("❌ You are not authenticated.");
+            //}
             string authHeader = Request.Headers["Authorization"];
             if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
             {
@@ -92,10 +96,7 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
             }
-            //if (!User.Identity?.IsAuthenticated ?? false)
-            //{
-            //    return Unauthorized("❌ You are not authenticated.");
-            //}
+            
 
             if (string.IsNullOrWhiteSpace(request.Username) ||
                 string.IsNullOrWhiteSpace(request.Email) ||

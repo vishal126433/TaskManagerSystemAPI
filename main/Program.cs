@@ -7,7 +7,7 @@ using System.Security.Claims;
 using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Logging;
 using System.IdentityModel.Tokens.Jwt;
-IdentityModelEventSource.ShowPII = true;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -17,6 +17,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
+var congifuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -93,6 +94,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"])
             //Convert.FromBase64String(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("SecretKey is missing"))
             ),
+            //RoleClaimType = ClaimTypes.Role
+
 
         };
 
@@ -190,7 +193,7 @@ app.UseHttpsRedirection();
 app.Use(async (context, next) =>
 {
     var token = context.Request.Headers["Authorization"].ToString();
-    Console.WriteLine($"?? Raw Authorization Header: '{token}'");
+    Console.WriteLine($"?? Raw Authorization Header: {token}");
     await next();
 });
 
