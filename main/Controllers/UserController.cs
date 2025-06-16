@@ -6,6 +6,7 @@ using AuthService.Models;
 using AuthService.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace AuthService.Controllers
 {
@@ -79,14 +80,22 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
             return Ok(users);
         }
 
-        //[Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)
         {
-            if (!User.Identity?.IsAuthenticated ?? false)
+            string authHeader = Request.Headers["Authorization"];
+            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
             {
-                return Unauthorized("❌ You are not authenticated.");
+                string token = authHeader.Substring("Bearer ".Length).Trim('"');
+                Console.WriteLine("🔐 Raw Token: " + token);
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
             }
+            //if (!User.Identity?.IsAuthenticated ?? false)
+            //{
+            //    return Unauthorized("❌ You are not authenticated.");
+            //}
 
             if (string.IsNullOrWhiteSpace(request.Username) ||
                 string.IsNullOrWhiteSpace(request.Email) ||

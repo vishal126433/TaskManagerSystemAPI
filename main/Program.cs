@@ -85,6 +85,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
+            //ClockSkew = TimeSpan.FromMinutes(10),
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
             ValidAudience = builder.Configuration["JwtSettings:Audience"],
@@ -93,84 +94,84 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             //Convert.FromBase64String(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("SecretKey is missing"))
             ),
 
-            //ClockSkew = TimeSpan.FromMinutes(5)
-
         };
 
         //  Add this block to log why token validation fails
-        options.Events = new JwtBearerEvents
-        {
-            // ?? This runs before token validation
-            OnMessageReceived = context =>
-            {
-                var authHeader = context.Request.Headers["Authorization"].ToString();
+        //options.Events = new JwtBearerEvents
+        //{
+        //    // ?? This runs before token validation
+        //    OnMessageReceived = context =>
+        //    {
+        //        var authHeader = context.Request.Headers["Authorization"].ToString();
 
-                if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
-                {
-                    var token = authHeader.Substring("Bearer ".Length).Trim().Trim('"');
-                    context.Token = token; // ? This overrides the token used in validation
-                }
+        //        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+        //        {
+        //            var token = authHeader.Substring("Bearer ".Length).Trim().Trim('"');
+        //            context.Token = token; // ? This overrides the token used in validation
+        //        }
 
-                return Task.CompletedTask;
-            },
+        //        return Task.CompletedTask;
+        //    },
 
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine("? Authentication failed:");
-                Console.WriteLine(context.Exception.Message);
+        //    OnAuthenticationFailed = context =>
+        //    {
+        //        Console.WriteLine("? Authentication failed:");
+        //        Console.WriteLine(context.Exception.Message);
 
-                var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-                var configuredIssuer = jwtSettings["Issuer"];
-                var configuredAudience = jwtSettings["Audience"];
-                var configuredKey = jwtSettings["SecretKey"];
+        //        var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+        //        var configuredIssuer = jwtSettings["Issuer"];
+        //        var configuredAudience = jwtSettings["Audience"];
+        //        var configuredKey = jwtSettings["SecretKey"];
 
-                var authHeader = context.Request.Headers["Authorization"].ToString();
+        //        var authHeader = context.Request.Headers["Authorization"].ToString();
 
-                if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
-                {
-                    var tokenStr = authHeader.Substring("Bearer ".Length).Trim('"');
-                    Console.WriteLine("?? Token that failed: " + tokenStr);
+        //        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+        //        {
+        //            var tokenStr = authHeader.Substring("Bearer ".Length).Trim('"');
+        //            Console.WriteLine("?? Token that failed: " + tokenStr);
 
-                    try
-                    {
-                        // Decode the token to inspect values
-                        var handler = new JwtSecurityTokenHandler();
-                        var jwtToken = handler.ReadJwtToken(tokenStr);
+        //            try
+        //            {
+        //                // Decode the token to inspect values
+        //                var handler = new JwtSecurityTokenHandler();
+        //                var jwtToken = handler.ReadJwtToken(tokenStr);
 
-                        Console.WriteLine("\n--- TOKEN VS CONFIG COMPARISON ---");
+        //                Console.WriteLine("\n--- TOKEN VS CONFIG COMPARISON ---");
 
-                        // ?? Issuer
-                        Console.WriteLine("?? Token Issuer (iss): " + jwtToken.Issuer);
-                        Console.WriteLine("??? Configured Issuer: " + configuredIssuer);
+        //                // ?? Issuer
+        //                Console.WriteLine("?? Token Issuer (iss): " + jwtToken.Issuer);
+        //                Console.WriteLine("??? Configured Issuer: " + configuredIssuer);
 
-                        // ?? Audience
-                        var tokenAudience = jwtToken.Audiences.FirstOrDefault();
-                        Console.WriteLine("?? Token Audience (aud): " + tokenAudience);
-                        Console.WriteLine("??? Configured Audience: " + configuredAudience);
+        //                // ?? Audience
+        //                var tokenAudience = jwtToken.Audiences.FirstOrDefault();
+        //                Console.WriteLine("?? Token Audience (aud): " + tokenAudience);
+        //                Console.WriteLine("??? Configured Audience: " + configuredAudience);
 
-                        // ?? Expiration
-                        Console.WriteLine("?? Token Expiry (exp): " + jwtToken.ValidTo + " (UTC)");
-                        Console.WriteLine("?? Current Time: " + DateTime.UtcNow);
 
-                        // ?? Algorithm
-                        Console.WriteLine("?? Token Alg: " + jwtToken.Header.Alg);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("?? Failed to parse JWT token: " + ex.Message);
-                    }
-                }
+        //                // ?? Expiration
+        //                Console.WriteLine("?? Token Expiry (exp): " + jwtToken.ValidTo + " (UTC)");
+        //                Console.WriteLine("?? Current Time: " + DateTime.UtcNow);
 
-                return Task.CompletedTask;
-            },
+        //                // ?? Algorithm
+        //                Console.WriteLine("?? Token Alg: " + jwtToken.Header.Alg);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Console.WriteLine("?? Failed to parse JWT token: " + ex.Message);
+        //            }
+        //        }
 
-            OnTokenValidated = context =>
-            {
-                Console.WriteLine("? JWT validated successfully.");
-                return Task.CompletedTask;
-            }
-        };
+        //        return Task.CompletedTask;
+        //    },
+
+        //    OnTokenValidated = context =>
+        //    {
+        //        Console.WriteLine("? JWT validated successfully.");
+        //        return Task.CompletedTask;
+        //    }
+        //};
     });
+
 
 builder.Services.AddAuthorization();
 
