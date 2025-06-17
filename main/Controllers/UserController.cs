@@ -84,7 +84,7 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)
         {
-            //if (!User.Identity?.IsAuthenticated ?? false)
+            //if (User?.Identity == null || !User.Identity.IsAuthenticated)
             //{
             //    return Unauthorized("❌ You are not authenticated.");
             //}

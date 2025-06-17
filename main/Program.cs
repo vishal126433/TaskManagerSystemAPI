@@ -57,13 +57,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // CORS policy to allow frontend (Angular) app
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngularApp", policy =>
+    options.AddPolicy("AngularApp", policy =>
     {
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()
-              //.WithExposedHeaders("Set-Cookie"); 
               .WithExposedHeaders("Set-Cookie", "Authorization", "Expires");
 
     });
@@ -90,8 +89,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-             Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
+             Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])),
             //RoleClaimType = ClaimTypes.Role
+            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
 
 
         };
@@ -178,7 +178,7 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-app.UseCors("AllowAngularApp");
+app.UseCors("AngularApp");
 
 if (app.Environment.IsDevelopment())
 {
