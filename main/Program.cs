@@ -6,9 +6,21 @@ using AuthService.Data;
 using System.Security.Claims;
 using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Logging;
-using System.IdentityModel.Tokens.Jwt;
+using TaskManager.Services;
+using TaskManager.Services.Tasks;
+using TaskManager.Services.Users;
+using TaskManager.Services.Tasks.DueDateChecker;
+using TaskManager.Services.Tasks.FileUpload;
+
+
+
+
+IdentityModelEventSource.ShowPII = true;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 // Add services to the container
 builder.Services.AddControllers();
@@ -47,12 +59,23 @@ builder.Services.AddSwaggerGen(options =>
 );
 
 builder.Services.AddHttpClient<IUserService, UserService>();
+builder.Services.AddScoped<ITaskUploadService, TaskUploadService>();
+builder.Services.AddHostedService<TaskDueDateChecker>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<ITaskStateService, TaskStateService>();
+builder.Services.AddScoped<ITaskDataParser, ExcelTaskDataParser>(); // For now only Excel
+
+
+
+
+
 
 
 // Configure Entity Framework with SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
 
 // CORS policy to allow frontend (Angular) app
 builder.Services.AddCors(options =>
@@ -91,86 +114,26 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
              Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])),
-            //RoleClaimType = ClaimTypes.Role
-            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            RoleClaimType = ClaimTypes.Role
+            //RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
 
 
         };
 
-        //  Add this block to log why token validation fails
-        //options.Events = new JwtBearerEvents
-        //{
-        //    // ?? This runs before token validation
-        //    OnMessageReceived = context =>
-        //    {
-        //        var authHeader = context.Request.Headers["Authorization"].ToString();
-
-        //        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
-        //        {
-        //            var token = authHeader.Substring("Bearer ".Length).Trim().Trim('"');
-        //            context.Token = token; // ? This overrides the token used in validation
-        //        }
-
-        //        return Task.CompletedTask;
-        //    },
-
-        //    OnAuthenticationFailed = context =>
-        //    {
-        //        Console.WriteLine("? Authentication failed:");
-        //        Console.WriteLine(context.Exception.Message);
-
-        //        var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-        //        var configuredIssuer = jwtSettings["Issuer"];
-        //        var configuredAudience = jwtSettings["Audience"];
-        //        var configuredKey = jwtSettings["SecretKey"];
-
-        //        var authHeader = context.Request.Headers["Authorization"].ToString();
-
-        //        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
-        //        {
-        //            var tokenStr = authHeader.Substring("Bearer ".Length).Trim('"');
-        //            Console.WriteLine("?? Token that failed: " + tokenStr);
-
-        //            try
-        //            {
-        //                // Decode the token to inspect values
-        //                var handler = new JwtSecurityTokenHandler();
-        //                var jwtToken = handler.ReadJwtToken(tokenStr);
-
-        //                Console.WriteLine("\n--- TOKEN VS CONFIG COMPARISON ---");
-
-        //                // ?? Issuer
-        //                Console.WriteLine("?? Token Issuer (iss): " + jwtToken.Issuer);
-        //                Console.WriteLine("??? Configured Issuer: " + configuredIssuer);
-
-        //                // ?? Audience
-        //                var tokenAudience = jwtToken.Audiences.FirstOrDefault();
-        //                Console.WriteLine("?? Token Audience (aud): " + tokenAudience);
-        //                Console.WriteLine("??? Configured Audience: " + configuredAudience);
-
-
-        //                // ?? Expiration
-        //                Console.WriteLine("?? Token Expiry (exp): " + jwtToken.ValidTo + " (UTC)");
-        //                Console.WriteLine("?? Current Time: " + DateTime.UtcNow);
-
-        //                // ?? Algorithm
-        //                Console.WriteLine("?? Token Alg: " + jwtToken.Header.Alg);
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Console.WriteLine("?? Failed to parse JWT token: " + ex.Message);
-        //            }
-        //        }
-
-        //        return Task.CompletedTask;
-        //    },
-
-        //    OnTokenValidated = context =>
-        //    {
-        //        Console.WriteLine("? JWT validated successfully.");
-        //        return Task.CompletedTask;
-        //    }
-        //};
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine("? Authentication failed:");
+                Console.WriteLine(context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("? Token validated.");
+                return Task.CompletedTask;
+            }
+        };
     });
 
 
@@ -195,7 +158,8 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.UseAuthentication();
+app.UseRouting();
+app.UseAuthentication(); // ? Ensures JWT is validated and User is set
 app.UseAuthorization();
 
 app.MapControllers();

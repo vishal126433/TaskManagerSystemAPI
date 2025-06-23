@@ -2,6 +2,13 @@
 using AuthService.Models;
 using AuthService.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using ExcelDataReader;
+using System.Data;
+using System.Threading.Tasks;
+using TaskManager.Services;
+using TaskManager.Services.Tasks;
+using TaskManager.Services.Tasks.FileUpload;
 
 namespace AuthService.Controllers
 {
@@ -10,46 +17,62 @@ namespace AuthService.Controllers
     public class TasksController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly ITaskUploadService _taskUploadService;
+        private readonly ITaskService _taskService;
 
-        public TasksController(AppDbContext db)
+       
+
+
+        public TasksController(AppDbContext db, ITaskUploadService taskUploadService, ITaskService taskService)
         {
             _db = db;
+            _taskUploadService = taskUploadService;
+            _taskService = taskService;
+
         }
+
+
 
         [HttpPost("create/{userId}")]
         public async Task<IActionResult> CreateTask(int userId, [FromBody] TaskItem task)
         {
-            if (string.IsNullOrWhiteSpace(task.Name) ||
-                string.IsNullOrWhiteSpace(task.Description) ||
-                string.IsNullOrWhiteSpace(task.Status))
+            try
             {
-                return BadRequest("All fields are required.");
+                var createdTask = await _taskService.CreateTaskAsync(userId, task);
+                return Ok(new { message = "Task created successfully", task = createdTask });
             }
-
-            task.UserId = userId; // Assign userId from URL to task
-
-            _db.Tasks.Add(task);
-            await _db.SaveChangesAsync();
-
-            return Ok(new { message = "Task created successfully", task });
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("statuslist")]
-        public IActionResult GetStatusList()
+        public async Task<IActionResult> GetStatusList()
         {
-            var statusList = _db.Statuses
-                                .Select(static s => s.Name.ToLower())
-                                .Distinct()
-                                .ToList();
-
+            var statusList = await _taskService.GetStatusListAsync();
             return Ok(statusList);
         }
 
 
-        [HttpGet("{userId}")]
-        public IActionResult GetTasksByUserId(int userId)
+        [HttpPost("upload")]
+        public async Task<IActionResult> Upload(IFormFile file)
         {
-            var tasks = _db.Tasks.Where(t => t.UserId == userId).ToList();
+            var result = await _taskUploadService.ProcessExcelAsync(file);
+
+            if (!result.Success)
+                return BadRequest(result.ErrorMessage);
+
+            return Ok(new { message = "Tasks uploaded successfully", count = result.Count });
+        }
+
+
+
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetTasksByUserId(int userId)
+        {
+            var tasks = await _taskService.GetTasksByUserIdAsync(userId);
             return Ok(tasks);
         }
 
@@ -57,33 +80,21 @@ namespace AuthService.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)
         {
-            var task = await _db.Tasks.FindAsync(id);
-            if (task == null)
-            {
+            var deleted = await _taskService.DeleteTaskAsync(id);
+            if (!deleted)
                 return NotFound(new { message = "Task not found." });
-            }
-
-            _db.Tasks.Remove(task);
-            await _db.SaveChangesAsync();
 
             return Ok(new { message = "Task deleted successfully." });
         }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTask(int id, TaskItem updatedTask)
         {
-            var existingTask = await _db.Tasks.FindAsync(id);
-            if (existingTask == null)
-            {
+            var result = await _taskService.UpdateTaskAsync(id, updatedTask);
+            if (result == null)
                 return NotFound(new { message = "Task not found." });
-            }
 
-            existingTask.Name = updatedTask.Name;
-            existingTask.Description = updatedTask.Description;
-            existingTask.Status = updatedTask.Status;
-
-            await _db.SaveChangesAsync();
-
-            return Ok(new { message = "Task updated successfully.", task = existingTask });
+            return Ok(new { message = "Task updated successfully.", task = result });
         }
 
     }

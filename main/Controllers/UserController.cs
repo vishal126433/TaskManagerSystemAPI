@@ -7,6 +7,7 @@ using AuthService.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using TaskManager.Services.Users;
 
 namespace AuthService.Controllers
 {
@@ -23,35 +24,35 @@ namespace AuthService.Controllers
             _context = context;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequest req)
-        {
-            var result = await _userService.RegisterAsync(req);
-            return Ok(result);
-        }
+        //[HttpPost("register")]
+        //public async Task<IActionResult> Register(RegisterRequest req)
+        //{
+        //    var result = await _userService.RegisterAsync(req);
+        //    return Ok(result);
+        //}
 
         [HttpPost("login")]
-public async Task<IActionResult> Login([FromBody] LoginRequest request)
-{
-    var token = await _userService.LoginAsync(request); // calls your method
+        //public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        //{
+        //    var token = await _userService.LoginAsync(request); // calls your method
 
-    // ✅ Set the cookie here using the refresh token
-    Response.Cookies.Append("refreshToken", token.RefreshToken, new CookieOptions
-    {
-        HttpOnly = true,
-        Secure = true,
-        SameSite = SameSiteMode.None,
-        Expires = DateTime.UtcNow.AddMinutes(30),
-        Path = "/"
-    });
+        //    // ✅ Set the cookie here using the refresh token
+        //    Response.Cookies.Append("refreshToken", token.RefreshToken, new CookieOptions
+        //    {
+        //        HttpOnly = true,
+        //        Secure = true,
+        //        SameSite = SameSiteMode.None,
+        //        Expires = DateTime.UtcNow.AddMinutes(30),
+        //        Path = "/"
+        //    });
 
-    // ✅ Return access token to frontend
-    return Ok(new
-    {
-        accessToken = token.AccessToken,
-        role = token.Role
-    });
-}
+        //    // ✅ Return access token to frontend
+        //    return Ok(new
+        //    {
+        //        accessToken = token.AccessToken,
+        //        role = token.Role
+        //    });
+        //}
 
 
         [HttpPost("refresh-token")]
@@ -65,13 +66,13 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
             return Ok(newToken);
         }
 
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            var result = await _userService.LogoutAsync();
-            Response.Cookies.Delete("refreshToken");
-            return Ok(result);
-        }
+        //[HttpPost("logout")]
+        //public async Task<IActionResult> Logout()
+        //{
+        //    var result = await _userService.LogoutAsync();
+        //    Response.Cookies.Delete("refreshToken");
+        //    return Ok(result);
+        //}
 
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
@@ -79,25 +80,10 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
             var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
-
         [Authorize(Roles = "Admin")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)
         {
-            //if (User?.Identity == null || !User.Identity.IsAuthenticated)
-            //{
-            //    return Unauthorized("❌ You are not authenticated.");
-            //}
-            string authHeader = Request.Headers["Authorization"];
-            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
-            {
-                string token = authHeader.Substring("Bearer ".Length).Trim('"');
-                Console.WriteLine("🔐 Raw Token: " + token);
-                var handler = new JwtSecurityTokenHandler();
-                var jwtToken = handler.ReadJwtToken(token);
-            }
-            
-
             if (string.IsNullOrWhiteSpace(request.Username) ||
                 string.IsNullOrWhiteSpace(request.Email) ||
                 string.IsNullOrWhiteSpace(request.Password))
@@ -105,20 +91,7 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
                 return BadRequest("Username, Email, and Password are required.");
             }
 
-            var passwordHasher = new PasswordHasher<User>();
-
-            var user = new User
-            {
-                Username = request.Username,
-                Email = request.Email,
-                // Role = string.IsNullOrWhiteSpace(request.Role) ? "User" : request.Role
-            };
-
-            user.PasswordHash = passwordHasher.HashPassword(user, request.Password);
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
+            var user = await _userService.CreateUserAsync(request);
             return Ok(new
             {
                 message = "User created successfully",
@@ -126,35 +99,26 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request)
             });
         }
 
-
-
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User updatedUser)
         {
-            var existingUser = await _context.Users.FindAsync(id);
-            if (existingUser == null)
+            var user = await _userService.UpdateUserAsync(id, updatedUser);
+            if (user == null)
                 return NotFound(new { message = "User not found." });
 
-            existingUser.Username = updatedUser.Username;
-            existingUser.Email = updatedUser.Email;
-            existingUser.PasswordHash = updatedUser.PasswordHash;
-            existingUser.Role = updatedUser.Role;
-
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "User updated successfully", user = existingUser });
+            return Ok(new { message = "User updated successfully", user });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            var success = await _userService.DeleteUserAsync(id);
+            if (!success)
                 return NotFound(new { message = "User not found." });
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
             return Ok(new { message = "User deleted successfully." });
         }
+
     }
 }
 
