@@ -54,6 +54,14 @@ namespace AuthService.Controllers
             return Ok(statusList);
         }
 
+        [HttpGet("typelist")]
+        public async Task<IActionResult> GetTypeList()
+        {
+            var typeList = await _taskService.GetTypeListAsync();
+            return Ok(typeList);
+        }
+
+
 
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile file)

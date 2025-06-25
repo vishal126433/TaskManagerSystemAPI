@@ -29,23 +29,23 @@ namespace TaskManager.Services.Tasks.DueDateChecker
                 if (task.Duedate.HasValue &&
                     (task.Duedate.Value.Date == now || task.Duedate.Value.Date == nextDay))
                 {
-                    task.State = "due";
+                    task.State = TaskStates.Due;
                     _logger.LogInformation($"📌 Task '{task.Name}' is due ({task.Duedate:yyyy-MM-dd}) - State set to 'due'.");
                     continue;
                 }
 
                 if (task.Duedate.HasValue && task.Duedate.Value.Date < now)
                 {
-                    task.State = "overdue";
+                    task.State = TaskStates.Overdue;
                     _logger.LogInformation($"⏰ Task '{task.Name}' is overdue - was due on {task.Duedate:yyyy-MM-dd}.");
                     continue;
                 }
 
-                if (!string.IsNullOrEmpty(task.Status))
-                {
-                    task.State = task.Status.ToLower();
-                    _logger.LogInformation($"📝 Task '{task.Name}' - Status '{task.Status}' copied to State.");
-                }
+                //if (!string.IsNullOrEmpty(task.Status))
+                //{
+                //    task.State = task.Status.ToLower();
+                //    _logger.LogInformation($"📝 Task '{task.Name}' - Status '{task.Status}' copied to State.");
+                //}
             }
 
             await _dbContext.SaveChangesAsync(cancellationToken);

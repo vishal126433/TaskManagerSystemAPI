@@ -10,6 +10,8 @@ namespace TaskManager.Services.Tasks
         Task<bool> DeleteTaskAsync(int id);
         Task<TaskItem?> UpdateTaskAsync(int id, TaskItem updatedTask);
         Task<List<string>> GetStatusListAsync();
+        Task<List<string>> GetTypeListAsync();
+
         Task<List<TaskItem>> GetTasksByUserIdAsync(int userId);
 
 

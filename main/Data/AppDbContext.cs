@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using AuthService.Models;
+using TaskManager.Models;
 
 namespace AuthService.Data
 {
@@ -12,5 +13,6 @@ namespace AuthService.Data
         //public DbSet<Role> Roles { get; set; }
         public DbSet<TaskItem> Tasks { get; set; }
         public DbSet<Status> Statuses { get; set; }
+        public DbSet<TaskType> Types { get; set; }
     }
 }

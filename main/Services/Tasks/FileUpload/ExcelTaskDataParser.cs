@@ -24,16 +24,7 @@ namespace TaskManager.Services.Tasks.FileUpload
                 ConfigureDataTable = _ => new ExcelDataTableConfiguration { UseHeaderRow = true }
             });
 
-            var table = result.Tables[0];
-            if (table == null || table.Rows.Count == 0)
-                throw new Exception("Empty Excel file.");
-
-            var expectedHeaders = new[] { "id", "name", "description", "dueDate", "status", "userId" };
-            foreach (var header in expectedHeaders)
-            {
-                if (!table.Columns.Contains(header))
-                    throw new Exception($"Missing expected header: {header}");
-            }
+            DataTable table = validateFile(result);
 
             for (int i = 0; i < table.Rows.Count; i++)
             {
@@ -49,6 +40,22 @@ namespace TaskManager.Services.Tasks.FileUpload
             }
 
             return tasks;
+
+            static DataTable validateFile(DataSet result)
+            {
+                var table = result.Tables[0];
+                if (table == null || table.Rows.Count == 0)
+                    throw new Exception("Empty Excel file.");
+
+                var expectedHeaders = new[] { "id", "name", "description", "dueDate", "status", "userId" };
+                foreach (var header in expectedHeaders)
+                {
+                    if (!table.Columns.Contains(header))
+                        throw new Exception($"Missing expected header: {header}");
+                }
+
+                return table;
+            }
         }
     }
 }

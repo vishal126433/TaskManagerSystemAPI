@@ -11,7 +11,8 @@
         public DateTime? Duedate { get; set; }  // ✅ Use DateTime
         public string State { get; set; } = string.Empty;
 
-        public string Status { get; set; } = "pending";
+        public string Status { get; set; } = "new";
+
         public int UserId { get; set; }  // <-- Add this
 
     }

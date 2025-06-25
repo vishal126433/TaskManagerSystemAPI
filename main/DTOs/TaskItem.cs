@@ -12,5 +12,7 @@
     public string State { get; set; } = string.Empty;
 
     public string Status { get; set; } = "pending";  // "pending" or "completed"
+    public string Type { get; set; } = "general";  // "pending" or "completed"
+
     public int UserId { get; internal set; }
 }

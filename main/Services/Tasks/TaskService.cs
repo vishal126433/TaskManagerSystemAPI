@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AuthService.Data;
 using AuthService.Models;
 using Microsoft.EntityFrameworkCore;
+using TaskManager.Helpers;
 
 namespace TaskManager.Services.Tasks
 {
@@ -23,16 +24,36 @@ namespace TaskManager.Services.Tasks
             if (string.IsNullOrWhiteSpace(task.Name) ||
                 string.IsNullOrWhiteSpace(task.Description) ||
                 !task.Duedate.HasValue ||
+                string.IsNullOrWhiteSpace(task.Type) ||
+
                 string.IsNullOrWhiteSpace(task.Status))
+
             {
                 throw new ArgumentException("All fields are required.");
             }
 
             task.UserId = userId;
+
+            //  Set State based on Status
+            switch (task.Status.ToLower())
+            {
+                case "new":
+                case "in progress":
+                    task.State = TaskStates.Open;
+                    break;
+                case "completed":
+                    task.State = TaskStates.Closed;
+                    break;
+                default:
+                    task.State = task.Status.ToLower(); // fallback for custom statuses
+                    break;
+            }
+
             _db.Tasks.Add(task);
             await _db.SaveChangesAsync();
             return task;
         }
+
         public async Task<bool> DeleteTaskAsync(int id)
         {
             var task = await _db.Tasks.FindAsync(id);
@@ -51,6 +72,8 @@ namespace TaskManager.Services.Tasks
             existingTask.Name = updatedTask.Name;
             existingTask.Description = updatedTask.Description;
             existingTask.Duedate = updatedTask.Duedate;
+            existingTask.Type = updatedTask.Type;
+
             existingTask.Status = updatedTask.Status;
 
             await _db.SaveChangesAsync();
@@ -59,6 +82,14 @@ namespace TaskManager.Services.Tasks
         public async Task<List<string>> GetStatusListAsync()
         {
             return await _db.Statuses
+                .Select(s => s.Name.ToLower())
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetTypeListAsync()
+        {
+            return await _db.Types
                 .Select(s => s.Name.ToLower())
                 .Distinct()
                 .ToListAsync();
