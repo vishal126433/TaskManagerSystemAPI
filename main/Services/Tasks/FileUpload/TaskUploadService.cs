@@ -7,11 +7,15 @@ namespace TaskManager.Services.Tasks.FileUpload
     {
         private readonly AppDbContext _db;
         private readonly ITaskDataParser _parser;
+        private readonly ITaskService _taskService;
 
-        public TaskUploadService(AppDbContext db, ITaskDataParser parser)
+
+        public TaskUploadService(AppDbContext db, ITaskDataParser parser, ITaskService taskService)
         {
             _db = db;
             _parser = parser;
+            _taskService = taskService;
+
         }
 
         public async Task<(bool Success, string ErrorMessage, int Count)> ProcessExcelAsync(IFormFile file)
@@ -25,10 +29,17 @@ namespace TaskManager.Services.Tasks.FileUpload
 
                 if (extension == ".xlsx" || extension == ".xls")
                 {
-                    var tasks = await _parser.ParseAsync(file);
-                    _db.Tasks.AddRange(tasks);
-                    await _db.SaveChangesAsync();
-                    return (true, "", tasks.Count);
+                    var parsedTasks = await _parser.ParseAsync(file);
+                    int createdCount = 0;
+
+                    foreach (var parsedTask in parsedTasks)
+                    {
+                        // call CreateTaskAsync to validate & set state before saving
+                        await _taskService.CreateTaskAsync(parsedTask.UserId, parsedTask);
+                        createdCount++;
+                    }
+
+                    return (true, "", createdCount);
                 }
                 else if (extension == ".csv")
                 {

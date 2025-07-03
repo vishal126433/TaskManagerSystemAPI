@@ -60,6 +60,28 @@ namespace AuthService.Controllers
             var typeList = await _taskService.GetTypeListAsync();
             return Ok(typeList);
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchTasks(int userId, string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Query cannot be empty.");
+
+            var tasks = await _taskService.SearchTasksByUserAsync(userId, query);
+            return Ok(tasks);
+        }
+
+       
+        [HttpGet("searchTasks")]
+        public async Task<IActionResult> SearchTasks(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Query cannot be empty.");
+
+            var tasks = await _taskService.SearchTasksAsync(query);
+            return Ok(tasks);
+        }
+
+
 
 
 
@@ -82,6 +104,16 @@ namespace AuthService.Controllers
         {
             var tasks = await _taskService.GetTasksByUserIdAsync(userId);
             return Ok(tasks);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetTasks(int pageNumber = 1, int pageSize = 5)
+        {
+            var result = await _taskService.GetTasksAsync(pageNumber, pageSize);
+            return Ok(new
+            {
+                tasks = result.Tasks,
+                totalCount = result.TotalCount
+            });
         }
 
 

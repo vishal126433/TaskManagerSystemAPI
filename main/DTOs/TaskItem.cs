@@ -13,6 +13,8 @@
 
     public string Status { get; set; } = "pending";  // "pending" or "completed"
     public string Type { get; set; } = "general";  // "pending" or "completed"
+    public DateTime? LastNotificationSentAt { get; set; }
+
 
     public int UserId { get; internal set; }
 }

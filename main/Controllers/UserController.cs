@@ -24,37 +24,6 @@ namespace AuthService.Controllers
             _context = context;
         }
 
-        //[HttpPost("register")]
-        //public async Task<IActionResult> Register(RegisterRequest req)
-        //{
-        //    var result = await _userService.RegisterAsync(req);
-        //    return Ok(result);
-        //}
-
-        [HttpPost("login")]
-        //public async Task<IActionResult> Login([FromBody] LoginRequest request)
-        //{
-        //    var token = await _userService.LoginAsync(request); // calls your method
-
-        //    // ✅ Set the cookie here using the refresh token
-        //    Response.Cookies.Append("refreshToken", token.RefreshToken, new CookieOptions
-        //    {
-        //        HttpOnly = true,
-        //        Secure = true,
-        //        SameSite = SameSiteMode.None,
-        //        Expires = DateTime.UtcNow.AddMinutes(30),
-        //        Path = "/"
-        //    });
-
-        //    // ✅ Return access token to frontend
-        //    return Ok(new
-        //    {
-        //        accessToken = token.AccessToken,
-        //        role = token.Role
-        //    });
-        //}
-
-
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
         {
@@ -65,21 +34,29 @@ namespace AuthService.Controllers
             var newToken = await _userService.RefreshTokenAsync(refreshToken);
             return Ok(newToken);
         }
-
-        //[HttpPost("logout")]
-        //public async Task<IActionResult> Logout()
-        //{
-        //    var result = await _userService.LogoutAsync();
-        //    Response.Cookies.Delete("refreshToken");
-        //    return Ok(result);
-        //}
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
+
+       [HttpPost("toggle-active/{id}")]
+public async Task<IActionResult> ToggleActiveStatus(int id)
+{
+    var user = await _context.Users.FindAsync(id);
+    if (user == null) return NotFound();
+
+    user.IsActive = !user.IsActive;
+    await _context.SaveChangesAsync();
+
+    return Ok(new { user.IsActive });
+}
+
+
+
+
         [Authorize(Roles = "Admin")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)

@@ -1,10 +1,8 @@
-﻿
-
-
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using AuthService.Data;
 using AuthService.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Helpers;
 
@@ -18,7 +16,7 @@ namespace TaskManager.Services.Tasks
         {
             _db = db;
         }
-
+       
         public async Task<TaskItem> CreateTaskAsync(int userId, TaskItem task)
         {
             if (string.IsNullOrWhiteSpace(task.Name) ||
@@ -35,13 +33,13 @@ namespace TaskManager.Services.Tasks
             task.UserId = userId;
 
             //  Set State based on Status
-            switch (task.Status.ToLower())
+            switch (task.Status)
             {
-                case "new":
-                case "in progress":
+                case "New":
+                case "In Progress":
                     task.State = TaskStates.Open;
                     break;
-                case "completed":
+                case "Completed":
                     task.State = TaskStates.Closed;
                     break;
                 default:
@@ -100,7 +98,42 @@ namespace TaskManager.Services.Tasks
                 .Where(t => t.UserId == userId)
                 .ToListAsync();
         }
-
         
+
+        public async Task<(List<TaskItem> Tasks, int TotalCount)> GetTasksAsync(int pageNumber = 1, int pageSize = 5)
+        {
+            var query = _db.Tasks.AsQueryable();
+            var totalCount = await query.CountAsync();
+            var tasks = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (tasks, totalCount);
+        }
+        public async Task<List<TaskItem>> SearchTasksByUserAsync(int userId, string query)
+        {
+            return await _db.Tasks
+                .Where(t => t.UserId == userId &&
+                            (t.Name.Contains(query) || t.Description.Contains(query)))
+                .OrderBy(t => t.Name)
+                .ToListAsync();
+        }
+
+        public async Task<List<TaskItem>> SearchTasksAsync(string query)
+        {
+            return await _db.Tasks
+                .Where(t => t.Name.Contains(query) || t.Description.Contains(query))
+                .OrderBy(t => t.Name)
+                .ToListAsync();
+        }
+
+
+        private IActionResult Ok(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+
     }
 }
