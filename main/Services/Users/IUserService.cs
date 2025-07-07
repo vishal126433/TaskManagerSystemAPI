@@ -31,5 +31,5 @@ public interface IUserService
     /// <returns></returns>
 
     Task<IEnumerable<User>> GetAllUsersAsync();
-
+    
 }

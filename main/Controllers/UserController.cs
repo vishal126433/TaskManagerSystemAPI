@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using TaskManager.Services.Users;
 
+
 namespace AuthService.Controllers
 {
     [ApiController]
@@ -20,9 +21,18 @@ namespace AuthService.Controllers
 
         public UsersController(IUserService userService, AppDbContext context)
         {
+
+            if (userService == null)
+                throw new InvalidOperationException("UserService is not initialized. Please check the dependency injection configuration.");
+
+            if (context == null)
+                throw new InvalidOperationException("AppDbContext is not initialized. Please check the dependency injection configuration.");
+
             _userService = userService;
             _context = context;
         }
+
+
 
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()

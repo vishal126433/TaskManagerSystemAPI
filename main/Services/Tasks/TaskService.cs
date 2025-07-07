@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AuthService.Data;
 using AuthService.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Helpers;
 
@@ -11,129 +12,212 @@ namespace TaskManager.Services.Tasks
     public class TaskService : ITaskService
     {
         private readonly AppDbContext _db;
+        private readonly ILogger<TaskService> _logger;
 
-        public TaskService(AppDbContext db)
+        public TaskService(AppDbContext db, ILogger<TaskService> logger)
         {
-            _db = db;
+            _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
+            _logger = logger;
         }
-       
+
         public async Task<TaskItem> CreateTaskAsync(int userId, TaskItem task)
         {
-            if (string.IsNullOrWhiteSpace(task.Name) ||
-                string.IsNullOrWhiteSpace(task.Description) ||
-                !task.Duedate.HasValue ||
-                string.IsNullOrWhiteSpace(task.Type) ||
-
-                string.IsNullOrWhiteSpace(task.Status))
-
+            try
             {
-                throw new ArgumentException("All fields are required.");
+                _logger.LogInformation("Attempting to create task for user {UserId}", userId);
+
+                if (string.IsNullOrWhiteSpace(task.Name) ||
+                    string.IsNullOrWhiteSpace(task.Description) ||
+                    !task.Duedate.HasValue ||
+                    string.IsNullOrWhiteSpace(task.Type) ||
+                    string.IsNullOrWhiteSpace(task.Status))
+                {
+                    _logger.LogWarning("Task creation failed: missing required fields for user {UserId}", userId);
+                    throw new ArgumentException("All fields are required.");
+                }
+
+                task.UserId = userId;
+                task.State = task.Status switch
+                {
+                    "new" or "in progress" => TaskStates.Open,
+                    "completed" => TaskStates.Closed,
+                    _ => task.Status.ToLower()
+                };
+
+                _db.Tasks.Add(task);
+                await _db.SaveChangesAsync();
+
+                _logger.LogInformation("Task created successfully for user {UserId}: {@Task}", userId, task);
+                return task;
             }
-
-            task.UserId = userId;
-
-            //  Set State based on Status
-            switch (task.Status)
+            catch (Exception ex)
             {
-                case "New":
-                case "In Progress":
-                    task.State = TaskStates.Open;
-                    break;
-                case "Completed":
-                    task.State = TaskStates.Closed;
-                    break;
-                default:
-                    task.State = task.Status.ToLower(); // fallback for custom statuses
-                    break;
+                _logger.LogError(ex, "Error creating task for user {UserId}", userId);
+                throw;
             }
-
-            _db.Tasks.Add(task);
-            await _db.SaveChangesAsync();
-            return task;
         }
 
         public async Task<bool> DeleteTaskAsync(int id)
         {
-            var task = await _db.Tasks.FindAsync(id);
-            if (task == null) return false;
+            try
+            {
+                _logger.LogInformation("Attempting to delete task with Id {TaskId}", id);
 
-            _db.Tasks.Remove(task);
-            await _db.SaveChangesAsync();
-            return true;
+                var task = await _db.Tasks.FindAsync(id);
+                if (task == null)
+                {
+                    _logger.LogWarning("Delete failed: task with Id {TaskId} not found", id);
+                    return false;
+                }
+
+                _db.Tasks.Remove(task);
+                await _db.SaveChangesAsync();
+
+                _logger.LogInformation("Task with Id {TaskId} deleted successfully", id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting task with Id {TaskId}", id);
+                throw;
+            }
         }
 
         public async Task<TaskItem?> UpdateTaskAsync(int id, TaskItem updatedTask)
         {
-            var existingTask = await _db.Tasks.FindAsync(id);
-            if (existingTask == null) return null;
+            try
+            {
+                _logger.LogInformation("Attempting to update task with Id {TaskId}", id);
 
-            existingTask.Name = updatedTask.Name;
-            existingTask.Description = updatedTask.Description;
-            existingTask.Duedate = updatedTask.Duedate;
-            existingTask.Type = updatedTask.Type;
+                var existingTask = await _db.Tasks.FindAsync(id);
+                if (existingTask == null)
+                {
+                    _logger.LogWarning("Update failed: task with Id {TaskId} not found", id);
+                    return null;
+                }
 
-            existingTask.Status = updatedTask.Status;
+                existingTask.Name = updatedTask.Name;
+                existingTask.Description = updatedTask.Description;
+                existingTask.Duedate = updatedTask.Duedate;
+                existingTask.Type = updatedTask.Type;
+                existingTask.Status = updatedTask.Status;
 
-            await _db.SaveChangesAsync();
-            return existingTask;
+                // Update State based on the new Status
+                existingTask.State = updatedTask.Status switch
+                {
+                    "new" or "in progress" => TaskStates.Open,
+                    "completed" => TaskStates.Closed,
+                    _ => updatedTask.Status.ToLower()
+                };
+
+                await _db.SaveChangesAsync();
+
+                _logger.LogInformation("Task with Id {TaskId} updated successfully", id);
+                return existingTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating task with Id {TaskId}", id);
+                throw;
+            }
         }
+
+
         public async Task<List<string>> GetStatusListAsync()
         {
-            return await _db.Statuses
-                .Select(s => s.Name.ToLower())
-                .Distinct()
-                .ToListAsync();
+            try
+            {
+                _logger.LogInformation("Fetching status list");
+                return await _db.Statuses.Select(s => s.Name.ToLower()).Distinct().ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching status list");
+                throw;
+            }
         }
 
         public async Task<List<string>> GetTypeListAsync()
         {
-            return await _db.Types
-                .Select(s => s.Name.ToLower())
-                .Distinct()
-                .ToListAsync();
+            try
+            {
+                _logger.LogInformation("Fetching type list");
+                return await _db.Types.Select(s => s.Name.ToLower()).Distinct().ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching type list");
+                throw;
+            }
         }
+
         public async Task<List<TaskItem>> GetTasksByUserIdAsync(int userId)
         {
-            return await _db.Tasks
-                .Where(t => t.UserId == userId)
-                .ToListAsync();
+            try
+            {
+                _logger.LogInformation("Fetching tasks for user {UserId}", userId);
+                return await _db.Tasks.Where(t => t.UserId == userId).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching tasks for user {UserId}", userId);
+                throw;
+            }
         }
-        
 
         public async Task<(List<TaskItem> Tasks, int TotalCount)> GetTasksAsync(int pageNumber = 1, int pageSize = 5)
         {
-            var query = _db.Tasks.AsQueryable();
-            var totalCount = await query.CountAsync();
-            var tasks = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            try
+            {
+                _logger.LogInformation("Fetching paginated tasks: Page {PageNumber}, PageSize {PageSize}", pageNumber, pageSize);
 
-            return (tasks, totalCount);
+                var query = _db.Tasks.AsQueryable();
+                var totalCount = await query.CountAsync();
+
+                var tasks = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+                _logger.LogInformation("Fetched {Count} tasks", tasks.Count);
+                return (tasks, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching paginated tasks");
+                throw;
+            }
         }
+
         public async Task<List<TaskItem>> SearchTasksByUserAsync(int userId, string query)
         {
-            return await _db.Tasks
-                .Where(t => t.UserId == userId &&
-                            (t.Name.Contains(query) || t.Description.Contains(query)))
-                .OrderBy(t => t.Name)
-                .ToListAsync();
+            try
+            {
+                _logger.LogInformation("Searching tasks for user {UserId} with query '{Query}'", userId, query);
+                return await _db.Tasks
+                    .Where(t => t.UserId == userId && (t.Name.Contains(query) || t.Description.Contains(query)))
+                    .OrderBy(t => t.Name)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching tasks for user {UserId}", userId);
+                throw;
+            }
         }
 
         public async Task<List<TaskItem>> SearchTasksAsync(string query)
         {
-            return await _db.Tasks
-                .Where(t => t.Name.Contains(query) || t.Description.Contains(query))
-                .OrderBy(t => t.Name)
-                .ToListAsync();
+            try
+            {
+                _logger.LogInformation("Searching tasks with query '{Query}'", query);
+                return await _db.Tasks
+                    .Where(t => t.Name.Contains(query) || t.Description.Contains(query))
+                    .OrderBy(t => t.Name)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching tasks");
+                throw;
+            }
         }
-
-
-        private IActionResult Ok(object value)
-        {
-            throw new NotImplementedException();
-        }
-
-
     }
 }

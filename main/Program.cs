@@ -9,24 +9,36 @@ using TaskManager.Helpers;
 using TaskManager.Services.Notifications;
 using TaskManagerSystemAPI.Middlewares;
 using AuthService.Data;
+using Serilog;
+using Serilog.Events;
 
 IdentityModelEventSource.ShowPII = true;
-
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information() // overall level
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Host.UseSerilog();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddAngularCors(builder.Configuration);
+
 
 // Use clean extension methods
 builder.Services.AddCustomSwagger();
 builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddAngularCors();
 
 // Register other services
 builder.Services.AddHttpClient<IUserService, UserService>();
 builder.Services.AddScoped<ITaskUploadService, TaskUploadService>();
-builder.Services.AddHostedService<TaskDueDateChecker>();
+//builder.Services.AddHostedService<TaskDueDateChecker>();
+
 builder.Services.AddScoped<ITaskService, TaskService>();
+
 builder.Services.AddScoped<ITaskStateService, TaskStateService>();
 builder.Services.AddScoped<ITaskDataParser, ExcelTaskDataParser>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
@@ -39,8 +51,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 var app = builder.Build();
+var corsPolicyName = builder.Configuration.GetValue<string>("Cors:PolicyName");
 
-app.UseCors("AngularApp");
+app.UseCors(corsPolicyName);
 
 if (app.Environment.IsDevelopment())
 {

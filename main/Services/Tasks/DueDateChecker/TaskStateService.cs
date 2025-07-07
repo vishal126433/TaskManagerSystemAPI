@@ -66,14 +66,7 @@ namespace TaskManager.Services.Tasks.DueDateChecker
                     }
                 }
 
-                //if (shouldSendEmail)
-                //{
-                //    await _emailService.SendEmailAsync(user.Email,
-                //        task.State == TaskStates.Overdue ? "Task Overdue" : "Task Due",
-                //        $"Your task '{task.Name}' is {(task.State == TaskStates.Overdue ? "overdue" : "due")} on {task.Duedate:yyyy-MM-dd}");
-
-                //    task.LastNotificationSentAt = nowUtc;
-                //}
+               
 
                 if (shouldSendEmail)
                 {
@@ -95,11 +88,7 @@ namespace TaskManager.Services.Tasks.DueDateChecker
                     task.LastNotificationSentAt = nowUtc;
                 }
 
-
-
             }
-
-
 
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
