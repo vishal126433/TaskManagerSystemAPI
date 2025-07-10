@@ -8,7 +8,7 @@
 
         public string Description { get; set; } = string.Empty;
 
-        public DateTime? Duedate { get; set; }  // ✅ Use DateTime
+        public DateTime? Duedate { get; set; }  
         public string State { get; set; } = string.Empty;
 
         public string Status { get; set; } = "new";

@@ -20,18 +20,14 @@ namespace AuthService.Controllers
         private readonly ITaskUploadService _taskUploadService;
         private readonly ITaskService _taskService;
 
-       
-
 
         public TasksController(AppDbContext db, ITaskUploadService taskUploadService, ITaskService taskService)
         {
-            _db = db;
+            _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
             _taskUploadService = taskUploadService;
             _taskService = taskService;
 
         }
-
-
 
         [HttpPost("create/{userId}")]
         public async Task<IActionResult> CreateTask(int userId, [FromBody] TaskItem task)
@@ -52,6 +48,12 @@ namespace AuthService.Controllers
         {
             var statusList = await _taskService.GetStatusListAsync();
             return Ok(statusList);
+        }
+        [HttpGet("prioritylist")]
+        public async Task<IActionResult> GetPriorityList()
+        {
+            var priorityList = await _taskService.GetPriorityListAsync();
+            return Ok(priorityList);
         }
 
         [HttpGet("typelist")]

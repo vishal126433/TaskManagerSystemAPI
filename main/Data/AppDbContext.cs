@@ -14,5 +14,7 @@ namespace AuthService.Data
         public DbSet<TaskItem> Tasks { get; set; }
         public DbSet<Status> Statuses { get; set; }
         public DbSet<TaskType> Types { get; set; }
+        public DbSet<TaskPriority> Priority { get; set; }
+
     }
 }

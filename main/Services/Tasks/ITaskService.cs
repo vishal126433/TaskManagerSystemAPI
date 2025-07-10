@@ -35,9 +35,9 @@ namespace TaskManager.Services.Tasks
         /// display the list of types of tasks
         /// </summary>
         /// <returns></returns>
-        Task<List<string>> GetTypeListAsync();
+        Task<List<string>> GetTypeListAsync(); 
         /// <summary>
-        /// display the list of tasks of a specific user
+        /// display the list of type of tasks
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
@@ -64,6 +64,10 @@ namespace TaskManager.Services.Tasks
         /// <param name="query"></param>
         /// <returns></returns>
         Task<List<TaskItem>> SearchTasksAsync(string query);
-
+        /// <summary>
+        /// display the list of priority of tasks
+        /// </summary>
+        /// <returns></returns>
+        Task<List<string>> GetPriorityListAsync();
     }
 }

@@ -36,6 +36,7 @@ namespace TaskManager.Services.Tasks.FileUpload
                     Duedate = DateTime.TryParse(row["dueDate"]?.ToString(), out var date) ? date : null,
                     Status = row["status"]?.ToString() ?? "",
                     Type = row["type"]?.ToString() ?? "",
+                    Priority = row["priority"]?.ToString() ?? "",
                     UserId = Convert.ToInt32(row["userId"])
                 });
             }
@@ -48,7 +49,7 @@ namespace TaskManager.Services.Tasks.FileUpload
                 if (table == null || table.Rows.Count == 0)
                     throw new Exception("Empty Excel file.");
 
-                var expectedHeaders = new[] { "id", "name", "description", "dueDate", "status", "type", "userId" };
+                var expectedHeaders = new[] { "id", "name", "description", "dueDate", "status", "type", "priority", "userId" };
                 foreach (var header in expectedHeaders)
                 {
                     if (!table.Columns.Contains(header))

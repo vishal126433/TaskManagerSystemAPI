@@ -12,8 +12,8 @@ namespace TaskManager.Services.Tasks.FileUpload
 
         public TaskUploadService(AppDbContext db, ITaskDataParser parser, ITaskService taskService)
         {
-            _db = db;
-            _parser = parser;
+            _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
+            _parser = parser ?? throw new ArgumentNullException(nameof(parser), "parser cannot be null.");
             _taskService = taskService;
 
         }
@@ -38,7 +38,6 @@ namespace TaskManager.Services.Tasks.FileUpload
                         await _taskService.CreateTaskAsync(parsedTask.UserId, parsedTask);
                         createdCount++;
                     }
-
                     return (true, "", createdCount);
                 }
                 else if (extension == ".csv")

@@ -17,7 +17,7 @@ namespace TaskManager.Services.Tasks
         public TaskService(AppDbContext db, ILogger<TaskService> logger)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "logger cannot be null.");
         }
 
         public async Task<TaskItem> CreateTaskAsync(int userId, TaskItem task)
@@ -25,11 +25,11 @@ namespace TaskManager.Services.Tasks
             try
             {
                 _logger.LogInformation("Attempting to create task for user {UserId}", userId);
-
                 if (string.IsNullOrWhiteSpace(task.Name) ||
                     string.IsNullOrWhiteSpace(task.Description) ||
                     !task.Duedate.HasValue ||
                     string.IsNullOrWhiteSpace(task.Type) ||
+                    string.IsNullOrWhiteSpace(task.Priority) ||
                     string.IsNullOrWhiteSpace(task.Status))
                 {
                     _logger.LogWarning("Task creation failed: missing required fields for user {UserId}", userId);
@@ -100,6 +100,8 @@ namespace TaskManager.Services.Tasks
                 existingTask.Description = updatedTask.Description;
                 existingTask.Duedate = updatedTask.Duedate;
                 existingTask.Type = updatedTask.Type;
+                existingTask.Priority = updatedTask.Priority;
+
                 existingTask.Status = updatedTask.Status;
 
                 // Update State based on the new Status
@@ -136,7 +138,19 @@ namespace TaskManager.Services.Tasks
                 throw;
             }
         }
-
+        public async Task<List<string>> GetPriorityListAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Fetching priority list");
+                return await _db.Priority.Select(s => s.Name.ToLower()).Distinct().ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching priority list");
+                throw;
+            }
+        }
         public async Task<List<string>> GetTypeListAsync()
         {
             try
