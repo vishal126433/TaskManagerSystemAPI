@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using TaskManager.Services;
 using TaskManager.Services.Tasks;
 using TaskManager.Services.Tasks.FileUpload;
+using TaskManager.Services.Tasks.DueDateChecker;
 
 namespace AuthService.Controllers
 {
@@ -19,13 +20,17 @@ namespace AuthService.Controllers
         private readonly AppDbContext _db;
         private readonly ITaskUploadService _taskUploadService;
         private readonly ITaskService _taskService;
+        private readonly ITaskStateService _taskStateService;
 
 
-        public TasksController(AppDbContext db, ITaskUploadService taskUploadService, ITaskService taskService)
+
+        public TasksController(AppDbContext db, ITaskUploadService taskUploadService, ITaskService taskService, ITaskStateService taskStateService)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
-            _taskUploadService = taskUploadService;
-            _taskService = taskService;
+            _taskUploadService = taskUploadService ?? throw new ArgumentNullException(nameof(taskUploadService), "taskUploadService cannot be null.");
+            _taskService = taskService ?? throw new ArgumentNullException(nameof(taskService), "taskService cannot be null.");
+            _taskStateService = taskStateService ?? throw new ArgumentNullException(nameof(taskStateService), "taskStateService cannot be null.");
+
 
         }
 
@@ -137,6 +142,13 @@ namespace AuthService.Controllers
                 return NotFound(new { message = "Task not found." });
 
             return Ok(new { message = "Task updated successfully.", task = result });
+        }
+
+        [HttpPost("run")]
+        public async Task<IActionResult> RunDueDateCheck(CancellationToken cancellationToken)
+        {
+            await _taskStateService.UpdateTaskStatesAsync(cancellationToken);
+            return Ok(new { message = "Task due dates checked and updated." });
         }
 
     }

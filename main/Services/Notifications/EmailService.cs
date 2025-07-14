@@ -3,6 +3,7 @@ using System.Net.Mail;
 using System.Net;
 using TaskManager.Helpers;
 using TaskManager.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace TaskManager.Services.Notifications
 {
@@ -12,7 +13,7 @@ namespace TaskManager.Services.Notifications
 
         public EmailService(IOptions<SmtpSettings> smtpOptions)
         {
-            _smtpSettings = smtpOptions.Value;
+            _smtpSettings = smtpOptions.Value ?? throw new ArgumentNullException(nameof(smtpOptions.Value), "smtpOptions.Value cannot be null.");
         }
 
         public async Task SendEmailAsync(EmailMessage message)

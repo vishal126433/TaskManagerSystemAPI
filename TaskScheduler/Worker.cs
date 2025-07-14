@@ -20,6 +20,8 @@ namespace duedate
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            File.AppendAllText(@"D:\logs\scheduler-log.txt", $"Started at {DateTime.Now}{Environment.NewLine}");
+
             var apiBaseUrl = _configuration.GetValue<string>("ApiBaseUrl");
             if (string.IsNullOrEmpty(apiBaseUrl))
             {
@@ -33,7 +35,9 @@ namespace duedate
             {
                 try
                 {
+
                     var response = await client.PostAsync($"{apiBaseUrl}/DueDateChecker/run", null, stoppingToken);
+                    _logger.LogWarning("Successfully called API to update task states.");
 
                     if (response.IsSuccessStatusCode)
                     {

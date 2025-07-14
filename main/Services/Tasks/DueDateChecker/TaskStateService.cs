@@ -21,10 +21,10 @@ namespace TaskManager.Services.Tasks.DueDateChecker
 
         public TaskStateService(AppDbContext dbContext, ILogger<TaskStateService> logger, IEmailService emailService, IOptions<TaskNotificationSettings> settings)
         {
-            _dbContext = dbContext;
-            _logger = logger;
-            _emailService = emailService;
-            _settings = settings.Value;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext), "dbContext cannot be null.");
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "logger cannot be null.");
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService), "emailService cannot be null.");
+            _settings = settings.Value ?? throw new ArgumentNullException(nameof(settings.Value), "settings.Value cannot be null.");
 
 
         }

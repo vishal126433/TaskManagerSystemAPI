@@ -14,7 +14,7 @@ namespace TaskManager.Services.Tasks.FileUpload
         {
             _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
             _parser = parser ?? throw new ArgumentNullException(nameof(parser), "parser cannot be null.");
-            _taskService = taskService;
+            _taskService = taskService ?? throw new ArgumentNullException(nameof(taskService), "taskService cannot be null.");
 
         }
 
