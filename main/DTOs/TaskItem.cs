@@ -18,5 +18,5 @@
     public DateTime? LastNotificationSentAt { get; set; }
 
 
-    public int UserId { get; internal set; }
+    public int UserId { get; set; }
 }

@@ -8,7 +8,7 @@ using System.Data;
 using System.Threading.Tasks;
 using TaskManager.Services;
 using TaskManager.Services.Tasks;
-using TaskManager.Services.Tasks.FileUpload;
+using TaskManager.Services.FileUpload.FileUploads;
 using TaskManager.Services.Tasks.DueDateChecker;
 
 namespace AuthService.Controllers
@@ -89,20 +89,33 @@ namespace AuthService.Controllers
         }
 
 
-
-
-
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
-            var result = await _taskUploadService.ProcessExcelAsync(file);
+            var parseResult = await _taskUploadService.ParseTasksFromFileAsync(file);
 
-            if (!result.Success)
-                return BadRequest(result.ErrorMessage);
+            if (!parseResult.Success)
+                return BadRequest(parseResult.ErrorMessage);
 
-            return Ok(new { message = "Tasks uploaded successfully", count = result.Count });
+            foreach (var parsed in parseResult.ParsedTasks)
+            {
+                var task = new TaskItem
+                {
+                    Name = parsed.Name,
+                    Duedate = parsed.Duedate,
+                    Description = parsed.Description,
+                    State = parsed.State,
+                    Status = parsed.Status,
+                    Type = parsed.Type,
+                    Priority = parsed.Priority,
+                    UserId = parsed.UserId
+                };
+
+                await _taskService.CreateTaskAsync(task.UserId, task);
+            }
+
+            return Ok(new { message = "Tasks uploaded successfully", count = parseResult.ParsedTasks.Count });
         }
-
 
 
 

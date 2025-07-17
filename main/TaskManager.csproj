@@ -29,8 +29,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-
-
 	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.13" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.13" />
@@ -41,6 +39,10 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TaskManager.Services.FileUpload\TaskManager.Services.FileUpload.csproj" />
   </ItemGroup>
 
 </Project>

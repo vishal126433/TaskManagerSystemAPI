@@ -35,8 +35,10 @@ namespace TaskManager.Services.Tasks.DueDateChecker
             var nextDay = DateHelper.Tomorrow;
 
             var allTasks = await _dbContext.Tasks.ToListAsync(cancellationToken);
+            _logger.LogInformation("inside task state service");
 
-        
+
+
 
 
             foreach (var task in allTasks)

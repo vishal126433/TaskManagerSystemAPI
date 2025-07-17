@@ -1,15 +1,18 @@
 ﻿
 using ExcelDataReader;
 using System.Data;
-using AuthService.Data;
+using Microsoft.AspNetCore.Http;
+using TaskManager.Services.FileUpload.FileUploads;
+using TaskManager.Services.FileUpload.Models;
 
-namespace TaskManager.Services.Tasks.FileUpload
+
+namespace TaskManager.Services.FileUpload.FileUploads
 {
     public class ExcelTaskDataParser : ITaskDataParser
     {
-        public async Task<List<TaskItem>> ParseAsync(IFormFile file)
+        public Task<List<ParsedTask>> ParseAsync(IFormFile file)
         {
-            var tasks = new List<TaskItem>();
+            var tasks = new List<ParsedTask>();
 
             if (file == null || file.Length == 0)
                 throw new Exception("No file uploaded.");
@@ -29,7 +32,7 @@ namespace TaskManager.Services.Tasks.FileUpload
             for (int i = 0; i < table.Rows.Count; i++)
             {
                 var row = table.Rows[i];
-                tasks.Add(new TaskItem
+                tasks.Add(new ParsedTask
                 {
                     Name = row["name"]?.ToString() ?? "",
                     Description = row["description"]?.ToString() ?? "",
@@ -41,7 +44,7 @@ namespace TaskManager.Services.Tasks.FileUpload
                 });
             }
 
-            return tasks;
+            return Task.FromResult(tasks);  //  Return wrapped in a Task
 
             static DataTable validateFile(DataSet result)
             {
@@ -49,7 +52,7 @@ namespace TaskManager.Services.Tasks.FileUpload
                 if (table == null || table.Rows.Count == 0)
                     throw new Exception("Empty Excel file.");
 
-                var expectedHeaders = new[] { "id", "name", "description", "dueDate", "status", "type", "priority", "userId" };
+                var expectedHeaders = new[] { "id", "Name", "Description", "DueDate", "Status", "Type", "Priority", "UserId" };
                 foreach (var header in expectedHeaders)
                 {
                     if (!table.Columns.Contains(header))
@@ -59,6 +62,7 @@ namespace TaskManager.Services.Tasks.FileUpload
                 return table;
             }
         }
+
     }
 }
 

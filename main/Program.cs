@@ -4,13 +4,15 @@ using TaskManager.Extensions;
 using TaskManager.Services.Tasks;
 using TaskManager.Services.Users;
 using TaskManager.Services.Tasks.DueDateChecker;
-using TaskManager.Services.Tasks.FileUpload;
 using TaskManager.Helpers;
 using TaskManager.Services.Notifications;
 using TaskManagerSystemAPI.Middlewares;
 using AuthService.Data;
 using Serilog;
 using Serilog.Events;
+//using TaskManager.Services.Tasks.FileUpload;
+using TaskManager.Services.FileUpload.FileUploads;
+
 
 IdentityModelEventSource.ShowPII = true;
 Log.Logger = new LoggerConfiguration()
@@ -21,6 +23,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 builder.Services.AddControllers();
@@ -35,6 +38,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 // Register other services
 builder.Services.AddHttpClient<IUserService, UserService>();
 builder.Services.AddScoped<ITaskUploadService, TaskUploadService>();
+
 //builder.Services.AddHostedService<TaskDueDateChecker>();
 
 builder.Services.AddScoped<ITaskService, TaskService>();
