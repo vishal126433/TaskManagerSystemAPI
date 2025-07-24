@@ -7,7 +7,6 @@
         public string Name { get; set; } = string.Empty;
     public DateTime? Duedate { get; set; }  // ✅ Use DateTime
 
-
     public string Description { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
 
@@ -18,5 +17,9 @@
     public DateTime? LastNotificationSentAt { get; set; }
 
 
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
+    public string? AssignedTo { get; set; }
+    //public string AssignedTo { get; set; }  // maps to Username in Tasks table
+
+
 }

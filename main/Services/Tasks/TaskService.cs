@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AuthService.Data;
 using AuthService.Models;
 using Microsoft.EntityFrameworkCore;
+using TaskManager.DTOs;
 using TaskManager.Helpers;
 
 namespace TaskManager.Services.Tasks
@@ -20,7 +21,8 @@ namespace TaskManager.Services.Tasks
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "logger cannot be null.");
         }
 
-        public async Task<TaskItem> CreateTaskAsync(int userId, TaskItem task)
+        public async Task<TaskItem> CreateTaskAsync(int? userId, TaskItem task)
+
         {
             try
             {
@@ -36,7 +38,7 @@ namespace TaskManager.Services.Tasks
                     throw new ArgumentException("All fields are required.");
                 }
 
-                task.UserId = userId;
+                task.UserId = (userId == 0) ? null : userId;
                 task.State = task.Status switch
                 {
                     "new" or "in progress" => TaskStates.Open,
@@ -55,6 +57,15 @@ namespace TaskManager.Services.Tasks
                 _logger.LogError(ex, "Error creating task for user {UserId}", userId);
                 throw;
             }
+        }
+        public async Task<TaskStatusCount> GetTaskStatusCountsAsync()
+        {
+            return new TaskStatusCount
+            {
+                Completed = await _db.Tasks.CountAsync(t => t.Status.ToLower() == "completed"),
+                Pending = await _db.Tasks.CountAsync(t => t.Status.ToLower() == "in progress"),
+                New = await _db.Tasks.CountAsync(t => t.Status.ToLower() == "new")
+            };
         }
 
         public async Task<bool> DeleteTaskAsync(int id)
@@ -196,6 +207,20 @@ namespace TaskManager.Services.Tasks
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching paginated tasks");
+                throw;
+            }
+        }
+
+        public async Task<List<TaskItem>> GetAllTasksAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Fetching all tasks (for count summary)");
+                return await _db.Tasks.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching all tasks");
                 throw;
             }
         }

@@ -1,6 +1,7 @@
 ﻿
 using System.Threading.Tasks;
 using AuthService.Models;
+using TaskManager.DTOs;
 
 namespace TaskManager.Services.Tasks
 {
@@ -12,7 +13,7 @@ namespace TaskManager.Services.Tasks
         /// <param name="userId"></param>
         /// <param name="task"></param>
         /// <returns></returns>
-        Task<TaskItem> CreateTaskAsync(int userId, TaskItem task);
+        Task<TaskItem> CreateTaskAsync(int? userId, TaskItem task);
         /// <summary>
         /// Delete task for a specific user
         /// </summary>
@@ -69,5 +70,7 @@ namespace TaskManager.Services.Tasks
         /// </summary>
         /// <returns></returns>
         Task<List<string>> GetPriorityListAsync();
+        Task<List<TaskItem>> GetAllTasksAsync();
+        Task<TaskStatusCount> GetTaskStatusCountsAsync();
     }
 }

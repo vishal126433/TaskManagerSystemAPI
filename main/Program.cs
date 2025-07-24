@@ -11,7 +11,14 @@ using AuthService.Data;
 using Serilog;
 using Serilog.Events;
 //using TaskManager.Services.Tasks.FileUpload;
-using TaskManager.Services.FileUpload.FileUploads;
+//using TaskManager.Services.FileUpload.FileUploads;
+using TaskManager.Services.FileUpload.Factories;
+using TaskManager.Services.FileUpload.Interfaces;
+using TaskManager.Services.FileUpload.Services;
+using TaskManager.Services.FileUpload.Parsers;
+
+
+
 
 
 IdentityModelEventSource.ShowPII = true;
@@ -39,12 +46,18 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddHttpClient<IUserService, UserService>();
 builder.Services.AddScoped<ITaskUploadService, TaskUploadService>();
 
+builder.Services.AddScoped<IParserFactory, ParserFactory>();
+
+
 //builder.Services.AddHostedService<TaskDueDateChecker>();
 
 builder.Services.AddScoped<ITaskService, TaskService>();
 
 builder.Services.AddScoped<ITaskStateService, TaskStateService>();
 builder.Services.AddScoped<ITaskDataParser, ExcelTaskDataParser>();
+builder.Services.AddScoped<ExcelTaskDataParser>(); // ? Explicit registration
+
+
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.Configure<TaskNotificationSettings>(

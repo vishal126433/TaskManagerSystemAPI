@@ -1,12 +1,16 @@
-﻿
+﻿using ExcelDataReader;
+using Microsoft.AspNetCore.Http;
+using System;
 using ExcelDataReader;
 using System.Data;
 using Microsoft.AspNetCore.Http;
-using TaskManager.Services.FileUpload.FileUploads;
 using TaskManager.Services.FileUpload.Models;
+using TaskManager.Services.FileUpload.Parsers; // or wherever ExcelTaskDataParser is defined
+
+using TaskManager.Services.FileUpload.Interfaces;
 
 
-namespace TaskManager.Services.FileUpload.FileUploads
+namespace TaskManager.Services.FileUpload.Parsers
 {
     public class ExcelTaskDataParser : ITaskDataParser
     {

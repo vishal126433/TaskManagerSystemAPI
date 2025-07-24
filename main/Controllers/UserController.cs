@@ -21,7 +21,6 @@ namespace AuthService.Controllers
 
         public UsersController(IUserService userService, AppDbContext context)
         {
-
             if (userService == null)
                 throw new InvalidOperationException("UserService is not initialized. Please check the dependency injection configuration.");
 
@@ -31,8 +30,6 @@ namespace AuthService.Controllers
             _userService = userService;
             _context = context;
         }
-
-
 
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
@@ -44,6 +41,7 @@ namespace AuthService.Controllers
             var newToken = await _userService.RefreshTokenAsync(refreshToken);
             return Ok(newToken);
         }
+
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
@@ -63,9 +61,6 @@ public async Task<IActionResult> ToggleActiveStatus(int id)
 
     return Ok(new { user.IsActive });
 }
-
-
-
 
         [Authorize(Roles = "Admin")]
         [HttpPost("create")]

@@ -8,8 +8,11 @@ using System.Data;
 using System.Threading.Tasks;
 using TaskManager.Services;
 using TaskManager.Services.Tasks;
-using TaskManager.Services.FileUpload.FileUploads;
+using TaskManager.Services.FileUpload.Interfaces;
 using TaskManager.Services.Tasks.DueDateChecker;
+using TaskManager.DTOs;
+using TaskManager.Services.Users;
+using TaskManager.Helpers;
 
 namespace AuthService.Controllers
 {
@@ -21,16 +24,17 @@ namespace AuthService.Controllers
         private readonly ITaskUploadService _taskUploadService;
         private readonly ITaskService _taskService;
         private readonly ITaskStateService _taskStateService;
+        private readonly IUserService _userService;
 
 
 
-        public TasksController(AppDbContext db, ITaskUploadService taskUploadService, ITaskService taskService, ITaskStateService taskStateService)
+        public TasksController(AppDbContext db, ITaskUploadService taskUploadService, ITaskService taskService, ITaskStateService taskStateService, IUserService userService)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
             _taskUploadService = taskUploadService ?? throw new ArgumentNullException(nameof(taskUploadService), "taskUploadService cannot be null.");
             _taskService = taskService ?? throw new ArgumentNullException(nameof(taskService), "taskService cannot be null.");
             _taskStateService = taskStateService ?? throw new ArgumentNullException(nameof(taskStateService), "taskStateService cannot be null.");
-
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService), "taskService cannot be null.");
 
         }
 
@@ -88,6 +92,83 @@ namespace AuthService.Controllers
             return Ok(tasks);
         }
 
+        [HttpPost("upload-json")]
+        public async Task<IActionResult> UploadJson([FromBody] List<TaskImport> tasks)
+        {
+            if (tasks == null || !tasks.Any())
+                return BadRequest("No tasks provided");
+
+            var errors = new List<string>();
+            int successCount = 0;
+
+            foreach (var dto in tasks)
+            {
+                if (!DateTime.TryParse(dto.DueDate, out var parsedDueDate))
+                {
+                    errors.Add($"Invalid date format for task '{dto.Name}'");
+                    continue;
+                }
+
+                int userId = 0;
+                string assignedUsername = string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(dto.AssignTo) && int.TryParse(dto.AssignTo, out int parsedUserId))
+                {
+                    var user = await _userService.GetUserByIdAsync(parsedUserId);
+                    if (user != null)
+                    {
+                        userId = parsedUserId;
+                        assignedUsername = user.Username;
+                    }
+                    else
+                    {
+                        errors.Add($"User not found for AssignTo '{dto.AssignTo}' in task '{dto.Name}'");
+                        continue;
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(dto.AssignTo))
+                {
+                    errors.Add($"Invalid AssignTo value '{dto.AssignTo}' for task '{dto.Name}'");
+                    continue;
+                }
+
+                var task = new TaskItem
+                {
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Duedate = parsedDueDate,
+                    Status = dto.Status,
+                    State = dto.Status switch
+                    {
+                        "new" or "in progress" => TaskStates.Open,
+                        "completed" => TaskStates.Closed,
+                        _ => dto.Status.ToLower()
+                    },
+                    Type = dto.Type,
+                    Priority = dto.Priority,
+                    UserId = userId,
+                    AssignedTo = assignedUsername
+                };
+
+                try
+                {
+                    await _taskService.CreateTaskAsync(task.UserId, task);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Failed to create task '{dto.Name}': {ex.Message}");
+                }
+            }
+
+            return Ok(new
+            {
+                message = "Tasks processed.",
+                successCount,
+                errorCount = errors.Count,
+                errors
+            });
+        }
 
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile file)
@@ -97,27 +178,14 @@ namespace AuthService.Controllers
             if (!parseResult.Success)
                 return BadRequest(parseResult.ErrorMessage);
 
-            foreach (var parsed in parseResult.ParsedTasks)
+            // Just return the parsed tasks without saving them
+            return Ok(new
             {
-                var task = new TaskItem
-                {
-                    Name = parsed.Name,
-                    Duedate = parsed.Duedate,
-                    Description = parsed.Description,
-                    State = parsed.State,
-                    Status = parsed.Status,
-                    Type = parsed.Type,
-                    Priority = parsed.Priority,
-                    UserId = parsed.UserId
-                };
-
-                await _taskService.CreateTaskAsync(task.UserId, task);
-            }
-
-            return Ok(new { message = "Tasks uploaded successfully", count = parseResult.ParsedTasks.Count });
+                message = "Tasks parsed successfully",
+                count = parseResult.ParsedTasks.Count,
+                data = parseResult.ParsedTasks
+            });
         }
-
-
 
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetTasksByUserId(int userId)
@@ -125,14 +193,20 @@ namespace AuthService.Controllers
             var tasks = await _taskService.GetTasksByUserIdAsync(userId);
             return Ok(tasks);
         }
+       
         [HttpGet]
         public async Task<IActionResult> GetTasks(int pageNumber = 1, int pageSize = 5)
         {
             var result = await _taskService.GetTasksAsync(pageNumber, pageSize);
+            var counts = await _taskService.GetTaskStatusCountsAsync();
+
             return Ok(new
             {
                 tasks = result.Tasks,
-                totalCount = result.TotalCount
+                totalCount = result.TotalCount,
+                completedCount = counts.Completed,
+                pendingCount = counts.Pending,
+                newCount = counts.New
             });
         }
 
