@@ -37,10 +37,6 @@ namespace TaskManager.Services.Tasks.DueDateChecker
             var allTasks = await _dbContext.Tasks.ToListAsync(cancellationToken);
             _logger.LogInformation("inside task state service");
 
-
-
-
-
             foreach (var task in allTasks)
             {
                 var user = await _dbContext.Users.FindAsync(task.UserId);
@@ -68,7 +64,6 @@ namespace TaskManager.Services.Tasks.DueDateChecker
                     }
                 }
 
-               
 
                 if (shouldSendEmail)
                 {
