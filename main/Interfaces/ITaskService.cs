@@ -1,9 +1,6 @@
-﻿
-using System.Threading.Tasks;
-using AuthService.Models;
-using TaskManager.DTOs;
+﻿using TaskManager.DTOs;
 
-namespace TaskManager.Services.Tasks
+namespace TaskManager.Interfaces
 {
     public interface ITaskService
     {
@@ -36,7 +33,7 @@ namespace TaskManager.Services.Tasks
         /// display the list of types of tasks
         /// </summary>
         /// <returns></returns>
-        Task<List<string>> GetTypeListAsync(); 
+        Task<List<string>> GetTypeListAsync();
         /// <summary>
         /// display the list of type of tasks
         /// </summary>

@@ -1,17 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AuthService.Models;
 using AuthService.Data;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using ExcelDataReader;
-using System.Data;
-using System.Threading.Tasks;
 using TaskManager.Services;
-using TaskManager.Services.Tasks;
+using TaskManager.Interfaces;
 using TaskManager.Services.FileUpload.Interfaces;
-using TaskManager.Services.Tasks.DueDateChecker;
 using TaskManager.DTOs;
-using TaskManager.Services.Users;
 using TaskManager.Helpers;
 
 namespace AuthService.Controllers
@@ -26,16 +19,13 @@ namespace AuthService.Controllers
         private readonly ITaskStateService _taskStateService;
         private readonly IUserService _userService;
 
-
-
         public TasksController(AppDbContext db, ITaskUploadService taskUploadService, ITaskService taskService, ITaskStateService taskStateService, IUserService userService)
         {
-            _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
-            _taskUploadService = taskUploadService ?? throw new ArgumentNullException(nameof(taskUploadService), "taskUploadService cannot be null.");
-            _taskService = taskService ?? throw new ArgumentNullException(nameof(taskService), "taskService cannot be null.");
-            _taskStateService = taskStateService ?? throw new ArgumentNullException(nameof(taskStateService), "taskStateService cannot be null.");
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService), "taskService cannot be null.");
-
+            _db = db ?? throw new ArgumentNullException(nameof(db));
+            _taskUploadService = taskUploadService ?? throw new ArgumentNullException(nameof(taskUploadService));
+            _taskService = taskService ?? throw new ArgumentNullException(nameof(taskService));
+            _taskStateService = taskStateService ?? throw new ArgumentNullException(nameof(taskStateService));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         [HttpPost("create/{userId}")]
@@ -44,11 +34,11 @@ namespace AuthService.Controllers
             try
             {
                 var createdTask = await _taskService.CreateTaskAsync(userId, task);
-                return Ok(new { message = "Task created successfully", task = createdTask });
+                return Ok(ApiResponse<object>.SuccessResponse(createdTask, 200, ResponseMessages.Task.Created));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponse<object>.SingleError(ex.Message));
             }
         }
 
@@ -56,47 +46,48 @@ namespace AuthService.Controllers
         public async Task<IActionResult> GetStatusList()
         {
             var statusList = await _taskService.GetStatusListAsync();
-            return Ok(statusList);
+            return Ok(ApiResponse<object>.SuccessResponse(statusList));
         }
+
         [HttpGet("prioritylist")]
         public async Task<IActionResult> GetPriorityList()
         {
             var priorityList = await _taskService.GetPriorityListAsync();
-            return Ok(priorityList);
+            return Ok(ApiResponse<object>.SuccessResponse(priorityList));
         }
 
         [HttpGet("typelist")]
         public async Task<IActionResult> GetTypeList()
         {
             var typeList = await _taskService.GetTypeListAsync();
-            return Ok(typeList);
+            return Ok(ApiResponse<object>.SuccessResponse(typeList));
         }
+
         [HttpGet("search")]
         public async Task<IActionResult> SearchTasks(int userId, string query)
         {
             if (string.IsNullOrWhiteSpace(query))
-                return BadRequest("Query cannot be empty.");
+                return BadRequest(ApiResponse<object>.SingleError("Query cannot be empty."));
 
             var tasks = await _taskService.SearchTasksByUserAsync(userId, query);
-            return Ok(tasks);
+            return Ok(ApiResponse<object>.SuccessResponse(tasks));
         }
 
-       
         [HttpGet("searchTasks")]
         public async Task<IActionResult> SearchTasks(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
-                return BadRequest("Query cannot be empty.");
+                return BadRequest(ApiResponse<object>.SingleError("Query cannot be empty."));
 
             var tasks = await _taskService.SearchTasksAsync(query);
-            return Ok(tasks);
+            return Ok(ApiResponse<object>.SuccessResponse(tasks));
         }
 
         [HttpPost("upload-json")]
         public async Task<IActionResult> UploadJson([FromBody] List<TaskImport> tasks)
         {
             if (tasks == null || !tasks.Any())
-                return BadRequest("No tasks provided");
+                return BadRequest(ApiResponse<object>.SingleError("No tasks provided"));
 
             var errors = new List<string>();
             int successCount = 0;
@@ -161,13 +152,13 @@ namespace AuthService.Controllers
                 }
             }
 
-            return Ok(new
+            return Ok(ApiResponse<object>.SuccessResponse(new
             {
                 message = "Tasks processed.",
                 successCount,
                 errorCount = errors.Count,
                 errors
-            });
+            }));
         }
 
         [HttpPost("upload")]
@@ -176,49 +167,47 @@ namespace AuthService.Controllers
             var parseResult = await _taskUploadService.ParseTasksFromFileAsync(file);
 
             if (!parseResult.Success)
-                return BadRequest(parseResult.ErrorMessage);
+                return BadRequest(ApiResponse<object>.SingleError(parseResult.ErrorMessage));
 
-            // Just return the parsed tasks without saving them
-            return Ok(new
+            return Ok(ApiResponse<object>.SuccessResponse(new
             {
-                message = "Tasks parsed successfully",
+                message = ResponseMessages.Task.Parsed,
                 count = parseResult.ParsedTasks.Count,
                 data = parseResult.ParsedTasks
-            });
+            }));
         }
 
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetTasksByUserId(int userId)
         {
             var tasks = await _taskService.GetTasksByUserIdAsync(userId);
-            return Ok(tasks);
+            return Ok(ApiResponse<object>.SuccessResponse(tasks));
         }
-       
+
         [HttpGet]
         public async Task<IActionResult> GetTasks(int pageNumber = 1, int pageSize = 5)
         {
             var result = await _taskService.GetTasksAsync(pageNumber, pageSize);
             var counts = await _taskService.GetTaskStatusCountsAsync();
 
-            return Ok(new
+            return Ok(ApiResponse<object>.SuccessResponse(new
             {
                 tasks = result.Tasks,
                 totalCount = result.TotalCount,
                 completedCount = counts.Completed,
                 pendingCount = counts.Pending,
                 newCount = counts.New
-            });
+            }));
         }
-
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)
         {
             var deleted = await _taskService.DeleteTaskAsync(id);
             if (!deleted)
-                return NotFound(new { message = "Task not found." });
+                return NotFound(ApiResponse<object>.SingleError("Task not found."));
 
-            return Ok(new { message = "Task deleted successfully." });
+            return Ok(ApiResponse<object>.SuccessResponse(null, 200, ResponseMessages.Task.Deleted));
         }
 
         [HttpPut("{id}")]
@@ -226,17 +215,16 @@ namespace AuthService.Controllers
         {
             var result = await _taskService.UpdateTaskAsync(id, updatedTask);
             if (result == null)
-                return NotFound(new { message = "Task not found." });
+                return NotFound(ApiResponse<object>.SingleError("Task not found."));
 
-            return Ok(new { message = "Task updated successfully.", task = result });
+            return Ok(ApiResponse<object>.SuccessResponse(result, 200, ResponseMessages.Task.Updated));
         }
 
         [HttpPost("run")]
         public async Task<IActionResult> RunDueDateCheck(CancellationToken cancellationToken)
         {
             await _taskStateService.UpdateTaskStatesAsync(cancellationToken);
-            return Ok(new { message = "Task due dates checked and updated." });
+            return Ok(ApiResponse<object>.SuccessResponse(null, 200, ResponseMessages.Task.Run));
         }
-
     }
 }

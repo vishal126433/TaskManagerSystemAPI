@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AuthService.Data;
-using AuthService.Models;
+﻿using AuthService.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TaskManager.DTOs;
 using TaskManager.Helpers;
+using TaskManager.Interfaces;
 
-namespace TaskManager.Services.Tasks
+namespace TaskManager.Services
 {
     public class TaskService : ITaskService
     {
@@ -112,6 +109,8 @@ namespace TaskManager.Services.Tasks
                 existingTask.Duedate = updatedTask.Duedate;
                 existingTask.Type = updatedTask.Type;
                 existingTask.Priority = updatedTask.Priority;
+                existingTask.AssignedTo = updatedTask.AssignedTo;
+
 
                 existingTask.Status = updatedTask.Status;
 

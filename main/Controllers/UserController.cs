@@ -1,14 +1,10 @@
 ﻿using Azure.Core;
-using Azure;
 using Microsoft.AspNetCore.Mvc;
-using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using AuthService.Models;
 using AuthService.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization;
-using System.IdentityModel.Tokens.Jwt;
-using TaskManager.Services.Users;
-
+using TaskManager.Interfaces;
+using TaskManager.Helpers;
 
 namespace AuthService.Controllers
 {
@@ -21,14 +17,8 @@ namespace AuthService.Controllers
 
         public UsersController(IUserService userService, AppDbContext context)
         {
-            if (userService == null)
-                throw new InvalidOperationException("UserService is not initialized. Please check the dependency injection configuration.");
-
-            if (context == null)
-                throw new InvalidOperationException("AppDbContext is not initialized. Please check the dependency injection configuration.");
-
-            _userService = userService;
-            _context = context;
+            _userService = userService ?? throw new InvalidOperationException("UserService not initialized.");
+            _context = context ?? throw new InvalidOperationException("AppDbContext not initialized.");
         }
 
         [HttpPost("refresh-token")]
@@ -36,10 +26,10 @@ namespace AuthService.Controllers
         {
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
-                return Unauthorized("No refresh token");
+                return Unauthorized(ApiResponse<string>.SingleError(ResponseMessages.User.NoRefreshToken));
 
             var newToken = await _userService.RefreshTokenAsync(refreshToken);
-            return Ok(newToken);
+            return Ok(ApiResponse<object>.SuccessResponse(newToken));
         }
 
         [Authorize(Roles = "Admin")]
@@ -47,20 +37,21 @@ namespace AuthService.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
+            return Ok(ApiResponse<object>.SuccessResponse(users));
         }
 
-       [HttpPost("toggle-active/{id}")]
-public async Task<IActionResult> ToggleActiveStatus(int id)
-{
-    var user = await _context.Users.FindAsync(id);
-    if (user == null) return NotFound();
+        [HttpPost("toggle-active/{id}")]
+        public async Task<IActionResult> ToggleActiveStatus(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound(ApiResponse<string>.SingleError(ResponseMessages.User.NotFound));
 
-    user.IsActive = !user.IsActive;
-    await _context.SaveChangesAsync();
+            user.IsActive = !user.IsActive;
+            await _context.SaveChangesAsync();
 
-    return Ok(new { user.IsActive });
-}
+            return Ok(ApiResponse<object>.SuccessResponse(new { user.IsActive }));
+        }
 
         [Authorize(Roles = "Admin")]
         [HttpPost("create")]
@@ -70,15 +61,12 @@ public async Task<IActionResult> ToggleActiveStatus(int id)
                 string.IsNullOrWhiteSpace(request.Email) ||
                 string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest("Username, Email, and Password are required.");
+                return BadRequest(ApiResponse<string>.SingleError(ResponseMessages.User.RequiredFieldsMissing));
             }
 
             var user = await _userService.CreateUserAsync(request);
-            return Ok(new
-            {
-                message = "User created successfully",
-                user = new { user.Username, user.Email, user.Role }
-            });
+            return Ok(ApiResponse<object>.SuccessResponse(new { user.Username, user.Email, user.Role },200,ResponseMessages.User.Created));
+
         }
 
         [HttpPut("{id}")]
@@ -86,21 +74,25 @@ public async Task<IActionResult> ToggleActiveStatus(int id)
         {
             var user = await _userService.UpdateUserAsync(id, updatedUser);
             if (user == null)
-                return NotFound(new { message = "User not found." });
+                return NotFound(ApiResponse<string>.SingleError(ResponseMessages.User.NotFound));
 
-            return Ok(new { message = "User updated successfully", user });
+            return Ok(ApiResponse<object>.SuccessResponse(
+                user,
+                message: ResponseMessages.User.Updated));
         }
+
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            var success = await _userService.DeleteUserAsync(id);
-            if (!success)
-                return NotFound(new { message = "User not found." });
+public async Task<IActionResult> DeleteUser(int id)
+{
+    var success = await _userService.DeleteUserAsync(id);
+    if (!success)
+        return NotFound(ApiResponse<string>.SingleError(ResponseMessages.User.NotFound));
 
-            return Ok(new { message = "User deleted successfully." });
-        }
+    return Ok(ApiResponse<string>.SuccessResponse(
+        data: null,
+        message: ResponseMessages.User.Deleted));
+}
 
     }
 }
-

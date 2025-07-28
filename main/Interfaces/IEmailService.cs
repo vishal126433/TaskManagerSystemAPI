@@ -1,13 +1,10 @@
 ﻿using TaskManager.Models;
 
-namespace TaskManager.Services.Notifications
+namespace TaskManager.Interfaces
 {
-
     public interface IEmailService
     {
         Task SendEmailAsync(EmailMessage message);
+
     }
-
 }
-
-

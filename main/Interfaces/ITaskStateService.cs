@@ -1,10 +1,8 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace TaskManager.Services.Tasks.DueDateChecker
+﻿namespace TaskManager.Interfaces
 {
     public interface ITaskStateService
     {
         Task UpdateTaskStatesAsync(CancellationToken cancellationToken);
+
     }
 }

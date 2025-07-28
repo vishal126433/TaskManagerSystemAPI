@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Logging;
 using TaskManager.Extensions;
-using TaskManager.Services.Tasks;
-using TaskManager.Services.Users;
-using TaskManager.Services.Tasks.DueDateChecker;
+//using TaskManager.Services.Tasks;
+//using TaskManager.Services.Users;
+using TaskManager.Interfaces;
+using TaskManager.Services;
+//using TaskManager.Services.Tasks.DueDateChecker;
 using TaskManager.Helpers;
-using TaskManager.Services.Notifications;
+//using TaskManager.Services.Notifications;
 using TaskManagerSystemAPI.Middlewares;
 using AuthService.Data;
 using Serilog;

@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
-using TaskManager.Services.Tasks.DueDateChecker;
+//using TaskManager.Services.Tasks.DueDateChecker;
+using TaskManager.Services;
+using TaskManager.Interfaces;
+using TaskManager.Helpers;
 
 namespace TaskManager.Controllers
 {
@@ -25,7 +28,7 @@ namespace TaskManager.Controllers
             //_Logger.LogInformation("inside due date checker");
 
             await _taskStateService.UpdateTaskStatesAsync(cancellationToken);
-            return Ok(new { message = "Task due dates checked and updated." });
+            return Ok(new { message = ResponseMessages.Task.checkedandupdated }); 
         }
     }
 }

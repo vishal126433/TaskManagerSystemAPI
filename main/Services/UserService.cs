@@ -2,8 +2,10 @@
 using AuthService.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using TaskManager.Interfaces;
 
-namespace TaskManager.Services.Users
+namespace TaskManager.Services
 {
     public class UserService : IUserService
     {

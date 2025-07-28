@@ -3,9 +3,9 @@ using System.Net.Mail;
 using System.Net;
 using TaskManager.Helpers;
 using TaskManager.Models;
-using Microsoft.EntityFrameworkCore;
+using TaskManager.Interfaces;
 
-namespace TaskManager.Services.Notifications
+namespace TaskManager.Services
 {
     public class EmailService : IEmailService
     {
@@ -37,7 +37,4 @@ namespace TaskManager.Services.Notifications
         }
 
     }
-
 }
-
-

@@ -1,14 +1,11 @@
 ﻿using AuthService.Data;
-using TaskManager.Helpers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using TaskManager.Services;
-using TaskManager.Services.Notifications;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using TaskManager.Helpers;
 using TaskManager.Models;
+using TaskManager.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
-namespace TaskManager.Services.Tasks.DueDateChecker
+namespace TaskManager.Services
 {
     public class TaskStateService : ITaskStateService
     {
@@ -67,7 +64,7 @@ namespace TaskManager.Services.Tasks.DueDateChecker
 
                 if (shouldSendEmail)
                 {
-                   
+
                     var statusText = task.State == TaskStates.Overdue
                         ? TaskStates.Overdue
                         : TaskStates.Due;
