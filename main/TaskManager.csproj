@@ -46,7 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TaskManager.Services.FileUpload\TaskManager.Services.FileUpload.csproj" />
+    <ProjectReference Include="..\TaskManager.Services.FileUpload\FileParser.csproj" />
   </ItemGroup>
 
 </Project>

@@ -153,5 +153,31 @@ namespace TaskManager.Services
                 throw;
             }
         }
+        public async Task<bool?> ToggleUserActiveStatusAsync(int id)
+        {
+            try
+            {
+                _logger.LogInformation("Toggling active status for user with Id {UserId}", id);
+
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    _logger.LogWarning("User with Id {UserId} not found", id);
+                    return null;
+                }
+
+                user.IsActive = !user.IsActive;
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("User with Id {UserId} active status set to {IsActive}", id, user.IsActive);
+                return user.IsActive;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling active status for user with Id {UserId}", id);
+                throw;
+            }
+        }
+
     }
 }

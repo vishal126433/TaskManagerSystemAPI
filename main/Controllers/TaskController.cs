@@ -13,15 +13,13 @@ namespace AuthService.Controllers
     [Route("[controller]")]
     public class TasksController : ControllerBase
     {
-        private readonly AppDbContext _db;
         private readonly ITaskUploadService _taskUploadService;
         private readonly ITaskService _taskService;
         private readonly ITaskStateService _taskStateService;
         private readonly IUserService _userService;
 
-        public TasksController(AppDbContext db, ITaskUploadService taskUploadService, ITaskService taskService, ITaskStateService taskStateService, IUserService userService)
+        public TasksController(ITaskUploadService taskUploadService, ITaskService taskService, ITaskStateService taskStateService, IUserService userService)
         {
-            _db = db ?? throw new ArgumentNullException(nameof(db));
             _taskUploadService = taskUploadService ?? throw new ArgumentNullException(nameof(taskUploadService));
             _taskService = taskService ?? throw new ArgumentNullException(nameof(taskService));
             _taskStateService = taskStateService ?? throw new ArgumentNullException(nameof(taskStateService));
@@ -67,7 +65,7 @@ namespace AuthService.Controllers
         public async Task<IActionResult> SearchTasks(int userId, string query)
         {
             if (string.IsNullOrWhiteSpace(query))
-                return BadRequest(ApiResponse<object>.SingleError("Query cannot be empty."));
+                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptySearchQuery));
 
             var tasks = await _taskService.SearchTasksByUserAsync(userId, query);
             return Ok(ApiResponse<object>.SuccessResponse(tasks));
@@ -77,7 +75,7 @@ namespace AuthService.Controllers
         public async Task<IActionResult> SearchTasks(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
-                return BadRequest(ApiResponse<object>.SingleError("Query cannot be empty."));
+                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptySearchQuery));
 
             var tasks = await _taskService.SearchTasksAsync(query);
             return Ok(ApiResponse<object>.SuccessResponse(tasks));
@@ -87,7 +85,7 @@ namespace AuthService.Controllers
         public async Task<IActionResult> UploadJson([FromBody] List<TaskImport> tasks)
         {
             if (tasks == null || !tasks.Any())
-                return BadRequest(ApiResponse<object>.SingleError("No tasks provided"));
+                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptyTask)); 
 
             var errors = new List<string>();
             int successCount = 0;
@@ -205,7 +203,7 @@ namespace AuthService.Controllers
         {
             var deleted = await _taskService.DeleteTaskAsync(id);
             if (!deleted)
-                return NotFound(ApiResponse<object>.SingleError("Task not found."));
+                return NotFound(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptyTask));
 
             return Ok(ApiResponse<object>.SuccessResponse(null, 200, ResponseMessages.Task.Deleted));
         }
@@ -215,7 +213,7 @@ namespace AuthService.Controllers
         {
             var result = await _taskService.UpdateTaskAsync(id, updatedTask);
             if (result == null)
-                return NotFound(ApiResponse<object>.SingleError("Task not found."));
+                return NotFound(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptyTask));
 
             return Ok(ApiResponse<object>.SuccessResponse(result, 200, ResponseMessages.Task.Updated));
         }

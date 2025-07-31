@@ -13,7 +13,9 @@ namespace TaskManager.Helpers
             public const string Parsed = "Tasks parsed successfully.";
             public const string Processed = "Tasks processed.";
             public const string Run = "Task due dates checked and updated.";
-            public const string checkedandupdated = "Task due dates checked and updated.."; 
+            public const string checkedandupdated = "Task due dates checked and updated..";
+            public const string EmptySearchQuery = "Query cannot be empty."; 
+            public const string EmptyTask = "No Task Provided.";
 
 
         }

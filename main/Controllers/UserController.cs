@@ -13,12 +13,10 @@ namespace AuthService.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly AppDbContext _context;
 
-        public UsersController(IUserService userService, AppDbContext context)
+        public UsersController(IUserService userService)
         {
             _userService = userService ?? throw new InvalidOperationException("UserService not initialized.");
-            _context = context ?? throw new InvalidOperationException("AppDbContext not initialized.");
         }
 
         [HttpPost("refresh-token")]
@@ -43,15 +41,13 @@ namespace AuthService.Controllers
         [HttpPost("toggle-active/{id}")]
         public async Task<IActionResult> ToggleActiveStatus(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            var result = await _userService.ToggleUserActiveStatusAsync(id);
+            if (result == null)
                 return NotFound(ApiResponse<string>.SingleError(ResponseMessages.User.NotFound));
 
-            user.IsActive = !user.IsActive;
-            await _context.SaveChangesAsync();
-
-            return Ok(ApiResponse<object>.SuccessResponse(new { user.IsActive }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { IsActive = result }));
         }
+
 
         [Authorize(Roles = "Admin")]
         [HttpPost("create")]

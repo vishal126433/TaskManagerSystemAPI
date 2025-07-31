@@ -32,6 +32,8 @@ namespace TaskManager.Interfaces
 
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(int id);
+        Task<bool?> ToggleUserActiveStatusAsync(int id);
+
 
 
     }
