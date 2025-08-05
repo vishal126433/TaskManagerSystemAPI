@@ -10,12 +10,14 @@ namespace TaskManager.Helpers
             public const string Updated = "Task updated successfully.";
             public const string Deleted = "Task deleted successfully.";
             public const string NotFound = "Task not found.";
-            public const string Parsed = "Tasks parsed successfully.";
+            public const string Parsed = "Tasks parsed successfully";
             public const string Processed = "Tasks processed.";
             public const string Run = "Task due dates checked and updated.";
             public const string checkedandupdated = "Task due dates checked and updated..";
             public const string EmptySearchQuery = "Query cannot be empty."; 
             public const string EmptyTask = "No Task Provided.";
+            public const string RetrievalFailed = "An error occurred while retrieving tasks.";
+
 
 
         }

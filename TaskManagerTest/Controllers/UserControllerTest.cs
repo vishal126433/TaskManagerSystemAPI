@@ -23,33 +23,45 @@ namespace TaskManagerTest.Controllers
             _controller = new UsersController(_userServiceMock.Object);
         }
 
+
         [Fact]
-        public async Task RefreshToken_ReturnsUnauthorized_WhenTokenMissing()
+        public async Task RefreshToken_ReturnsUnauthorized_WhenTokenIsMissing()
         {
-            _controller.ControllerContext = new ControllerContext();
-            _controller.ControllerContext.HttpContext = new DefaultHttpContext();
+            var context = new DefaultHttpContext(); // No cookie at all
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+
             var result = await _controller.RefreshToken();
+
             var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
             Assert.Equal(401, unauthorized.StatusCode);
         }
 
-        //[Fact]
-        //public async Task RefreshToken_ReturnsNewToken_WhenTokenIsValid()
-        //{
-        //    var expectedToken = new { AccessToken = "newtoken", RefreshToken = "refresh" };
-        //    _controller.ControllerContext = new ControllerContext
-        //    {
-        //        HttpContext = new DefaultHttpContext()
-        //    };
-        //    _controller.ControllerContext.HttpContext.Request.Cookies = new RequestCookieCollection(
-        //        new Dictionary<string, string> { { "refreshToken", "validtoken" } });
 
-        //    _userServiceMock.Setup(s => s.RefreshTokenAsync("validtoken")).ReturnsAsync(expectedToken);
-        //    var result = await _controller.RefreshToken();
 
-        //    var okResult = Assert.IsType<OkObjectResult>(result);
-        //    Assert.Equal(200, okResult.StatusCode);
-        //}
+        [Fact]
+        public async Task RefreshToken_ReturnsNewToken_WhenTokenIsValid()
+        {
+            var expectedToken = new TokenResponse { AccessToken = "newtoken", RefreshToken = "refresh" };
+
+            var context = new DefaultHttpContext();
+            context.Request.Headers["Cookie"] = "refreshToken=validtoken";
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+
+            _userServiceMock.Setup(s => s.RefreshTokenAsync("validtoken")).ReturnsAsync(expectedToken);
+
+            var result = await _controller.RefreshToken();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
+        }
+
 
         [Fact]
         public async Task GetAllUsers_ReturnsUsersList()

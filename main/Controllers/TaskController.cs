@@ -36,7 +36,7 @@ namespace AuthService.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ApiResponse<object>.SingleError(ex.Message));
+                return BadRequest(ApiResponse<object>.SingleError(ex.Message, 400, "Invalid task data"));
             }
         }
 
@@ -107,10 +107,7 @@ namespace AuthService.Controllers
                     if (user != null)
                     {
                         userId = parsedUserId;
-                        assignedUsername = user.Username;
-                    }
-                    else
-                    {
+                    }else{
                         errors.Add($"User not found for AssignTo '{dto.AssignTo}' in task '{dto.Name}'");
                         continue;
                     }
@@ -145,11 +142,8 @@ namespace AuthService.Controllers
                     successCount++;
                 }
                 catch (Exception ex)
-                {
-                    errors.Add($"Failed to create task '{dto.Name}': {ex.Message}");
-                }
+                {errors.Add($"Failed to create task '{dto.Name}': {ex.Message}");}
             }
-
             return Ok(ApiResponse<object>.SuccessResponse(new
             {
                 message = "Tasks processed.",
@@ -166,7 +160,6 @@ namespace AuthService.Controllers
 
             if (!parseResult.Success)
                 return BadRequest(ApiResponse<object>.SingleError(parseResult.ErrorMessage));
-
             return Ok(ApiResponse<object>.SuccessResponse(new
             {
                 message = ResponseMessages.Task.Parsed,
@@ -178,8 +171,15 @@ namespace AuthService.Controllers
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetTasksByUserId(int userId)
         {
-            var tasks = await _taskService.GetTasksByUserIdAsync(userId);
-            return Ok(ApiResponse<object>.SuccessResponse(tasks));
+            try
+            {
+                var tasks = await _taskService.GetTasksByUserIdAsync(userId);
+                return Ok(ApiResponse<List<TaskItem>>.SuccessResponse(tasks));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.ErrorResponse(new List<string> { ResponseMessages.Task.RetrievalFailed }, 500));
+            }
         }
 
         [HttpGet]
@@ -187,7 +187,6 @@ namespace AuthService.Controllers
         {
             var result = await _taskService.GetTasksAsync(pageNumber, pageSize);
             var counts = await _taskService.GetTaskStatusCountsAsync();
-
             return Ok(ApiResponse<object>.SuccessResponse(new
             {
                 tasks = result.Tasks,
