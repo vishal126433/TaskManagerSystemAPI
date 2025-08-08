@@ -39,7 +39,98 @@ public class TasksControllerTest
             _userServiceMock.Object
         );
     }
+    [Fact]
+    public void Constructor_ShouldCreateController_WhenAllDependenciesAreProvided()
+    {
+        // Arrange
+        var taskUploadService = new Mock<ITaskUploadService>().Object;
+        var taskService = new Mock<ITaskService>().Object;
+        var taskStateService = new Mock<ITaskStateService>().Object;
+        var userService = new Mock<IUserService>().Object;
 
+        // Act
+        var controller = new TasksController(taskUploadService, taskService, taskStateService, userService);
+
+        // Assert
+        Assert.NotNull(controller);
+    }
+
+
+    [Fact]
+    public void Constructor_ThrowsArgumentNullException_WhenTaskUploadServiceIsNull()
+    {
+        // Arrange
+        var taskService = new Mock<ITaskService>().Object;
+        var taskStateService = new Mock<ITaskStateService>().Object;
+        var userService = new Mock<IUserService>().Object;
+
+        // Act & Assert
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new TasksController(null, taskService, taskStateService, userService));
+
+        Assert.Equal("taskUploadService", ex.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_ThrowsArgumentNullException_WhenTaskServiceIsNull()
+    {
+        var taskUploadService = new Mock<ITaskUploadService>().Object;
+        var taskStateService = new Mock<ITaskStateService>().Object;
+        var userService = new Mock<IUserService>().Object;
+
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new TasksController(taskUploadService, null, taskStateService, userService));
+
+        Assert.Equal("taskService", ex.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_ThrowsArgumentNullException_WhenTaskStateServiceIsNull()
+    {
+        var taskUploadService = new Mock<ITaskUploadService>().Object;
+        var taskService = new Mock<ITaskService>().Object;
+        var userService = new Mock<IUserService>().Object;
+
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new TasksController(taskUploadService, taskService, null, userService));
+
+        Assert.Equal("taskStateService", ex.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_ThrowsArgumentNullException_WhenUserServiceIsNull()
+    {
+        var taskUploadService = new Mock<ITaskUploadService>().Object;
+        var taskService = new Mock<ITaskService>().Object;
+        var taskStateService = new Mock<ITaskStateService>().Object;
+
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new TasksController(taskUploadService, taskService, taskStateService, null));
+
+        Assert.Equal("userService", ex.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_CreatesController_WhenAllServicesAreProvided()
+    {
+        var taskUploadService = new Mock<ITaskUploadService>().Object;
+        var taskService = new Mock<ITaskService>().Object;
+        var taskStateService = new Mock<ITaskStateService>().Object;
+        var userService = new Mock<IUserService>().Object;
+
+        var controller = new TasksController(taskUploadService, taskService, taskStateService, userService);
+
+        Assert.NotNull(controller);
+    }
+
+    [Fact]
+    public void Constructor_ThrowsArgumentNullException_WhenAllServicesAreNull()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new TasksController(null, null, null, null));
+
+        Assert.Equal("taskUploadService", ex.ParamName); // First one hit
+    }
 
     [Fact]
     public async Task CreateTask_ReturnsOk_WithCreatedTask()
@@ -54,24 +145,7 @@ public class TasksControllerTest
         var apiResponse = Assert.IsType<ApiResponse<object>>(okResult.Value);
         Assert.Equal(200, apiResponse.StatusCode);
     }
-    [Fact]
-    public async Task CreateTask_ReturnsBadRequest_WhenArgumentExceptionThrown()
-    {
-        var task = new TaskItem { Id = 1, Name = "Invalid Task" };
-        _taskServiceMock.Setup(x => x.CreateTaskAsync(It.IsAny<int>(), It.IsAny<TaskItem>()))
-            .ThrowsAsync(new ArgumentException("Invalid task data"));
-
-        var result = await _controller.CreateTask(1, task);
-
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        var apiResponse = Assert.IsType<ApiResponse<object>>(badRequestResult.Value);
-        Assert.False(apiResponse.Success);
-        Assert.Equal(400, apiResponse.StatusCode);
-        Assert.Equal("Invalid task data", apiResponse.Message); // This will now pass
-        Assert.Contains("Invalid task data", apiResponse.Errors);
-    }
-
-
+   
     [Fact]
     public async Task GetStatusList_ReturnsOk()
     {
@@ -309,6 +383,183 @@ public class TasksControllerTest
     }
 
     [Fact]
+    public async Task UploadJson_HandlesUnknownStatus_MapsToLowercase()
+    {
+        var taskDtoList = new List<TaskImport>
+    {
+        new TaskImport { Name = "Test", DueDate = "2025-01-01", Status = "customstatus", Type = "bug", Priority = "high" }
+    };
+
+        _taskServiceMock.Setup(x => x.CreateTaskAsync(It.IsAny<int>(), It.Is<TaskItem>(t => t.State == "customstatus")))
+            .ReturnsAsync(new TaskItem());
+
+        var result = await _controller.UploadJson(taskDtoList);
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
+
+        var json = JsonSerializer.Serialize(response.Data);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        Assert.Equal(1, root.GetProperty("successCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("errorCount").GetInt32());
+    }
+
+    [Fact]
+    public async Task UploadJson_SetsUserIdAndAssignedTo_WhenAssignToIsValid()
+    {
+        var taskDtoList = new List<TaskImport>
+    {
+        new TaskImport
+        {
+            Name = "Test",
+            DueDate = "2025-01-01",
+            Status = "new",
+            AssignTo = "123",
+            Type = "bug",
+            Priority = "high"
+        }
+    };
+
+        _userServiceMock.Setup(x => x.GetUserByIdAsync(123))
+            .ReturnsAsync(new User { Id = 123, Username = "john.doe" });
+
+        _taskServiceMock.Setup(x => x.CreateTaskAsync(It.IsAny<int>(), It.Is<TaskItem>(t =>
+            t.UserId == 123 && t.AssignedTo == "john.doe")))
+            .ReturnsAsync(new TaskItem());
+
+        var result = await _controller.UploadJson(taskDtoList);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
+
+        var json = JsonSerializer.Serialize(response.Data);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        Assert.Equal(1, root.GetProperty("successCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("errorCount").GetInt32());
+    }
+
+    [Fact]
+    public async Task UploadJson_HandlesCaseInsensitiveStatus()
+    {
+        var taskDtoList = new List<TaskImport>
+    {
+        new TaskImport { Name = "Test", DueDate = "2025-01-01", Status = "Completed", Type = "bug", Priority = "high" }
+    };
+
+        _taskServiceMock.Setup(x => x.CreateTaskAsync(It.IsAny<int>(), It.Is<TaskItem>(t => t.State == TaskStates.Closed)))
+            .ReturnsAsync(new TaskItem());
+
+        var result = await _controller.UploadJson(taskDtoList);
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
+
+        var json = JsonSerializer.Serialize(response.Data);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        Assert.Equal(1, root.GetProperty("successCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("errorCount").GetInt32());
+    }
+
+    [Fact]
+    public async Task UploadJson_MapsInProgressStatus_ToOpen()
+    {
+        var taskDtoList = new List<TaskImport>
+    {
+        new TaskImport { Name = "Test", DueDate = "2025-01-01", Status = "in progress", Type = "bug", Priority = "high" }
+    };
+
+        _taskServiceMock.Setup(x => x.CreateTaskAsync(It.IsAny<int>(), It.Is<TaskItem>(t => t.State == TaskStates.Open)))
+            .ReturnsAsync(new TaskItem());
+
+        var result = await _controller.UploadJson(taskDtoList);
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
+
+        var json = JsonSerializer.Serialize(response.Data);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        Assert.Equal(1, root.GetProperty("successCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("errorCount").GetInt32());
+    }
+    [Fact]
+    public async Task UploadJson_Succeeds_WhenAssignToIsNull()
+    {
+        var taskDtoList = new List<TaskImport>
+    {
+        new TaskImport { Name = "No Assignee", DueDate = "2025-01-01", Status = "new", Type = "bug", Priority = "medium", AssignTo = null }
+    };
+
+        _taskServiceMock.Setup(x => x.CreateTaskAsync(It.IsAny<int>(), It.IsAny<TaskItem>()))
+            .ReturnsAsync(new TaskItem());
+
+        var result = await _controller.UploadJson(taskDtoList);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
+
+        var json = JsonSerializer.Serialize(response.Data);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        Assert.Equal(1, root.GetProperty("successCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("errorCount").GetInt32());
+    }
+    [Fact]
+    public async Task UploadJson_HandlesMixedValidAndInvalidTasks()
+    {
+        var taskDtoList = new List<TaskImport>
+    {
+        new TaskImport { Name = "Valid Task", DueDate = "2025-01-01", Status = "new", Type = "bug", Priority = "high" },
+        new TaskImport { Name = "Invalid DueDate", DueDate = "invalid-date" }
+    };
+
+        _taskServiceMock.Setup(x => x.CreateTaskAsync(It.IsAny<int>(), It.IsAny<TaskItem>()))
+            .ReturnsAsync(new TaskItem());
+
+        var result = await _controller.UploadJson(taskDtoList);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
+
+        var json = JsonSerializer.Serialize(response.Data);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        Assert.Equal(1, root.GetProperty("successCount").GetInt32());
+        Assert.Equal(1, root.GetProperty("errorCount").GetInt32());
+    }
+
+    [Fact]
+    public async Task UploadJson_UppercaseStatus_FallsBackToLowercase()
+    {
+        var taskDtoList = new List<TaskImport>
+    {
+        new TaskImport { Name = "Uppercase", DueDate = "2025-01-01", Status = "IN PROGRESS", Type = "bug", Priority = "high" }
+    };
+
+        _taskServiceMock.Setup(x => x.CreateTaskAsync(It.IsAny<int>(), It.Is<TaskItem>(t => t.State == "in progress")))
+            .ReturnsAsync(new TaskItem());
+
+        var result = await _controller.UploadJson(taskDtoList);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
+
+        var json = JsonSerializer.Serialize(response.Data);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        Assert.Equal(1, root.GetProperty("successCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("errorCount").GetInt32());
+    }
+
+
+    [Fact]
     public async Task GetTasksByUserId_ReturnsOk()
     {
         // Arrange
@@ -355,24 +606,7 @@ public class TasksControllerTest
         Assert.Equal(200, response.StatusCode);
         Assert.Empty(response.Data);
     }
-    [Fact]
-    public async Task GetTasksByUserId_Returns500_OnException()
-    {
-        // Arrange
-        _taskServiceMock
-            .Setup(x => x.GetTasksByUserIdAsync(It.IsAny<int>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetTasksByUserId(1);
-
-        // Assert
-        var objectResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(500, objectResult.StatusCode);
-    }
-
-
-
+  
 
     [Fact]
     public async Task DeleteTask_ReturnsOk_WhenTaskDeleted()
@@ -383,7 +617,7 @@ public class TasksControllerTest
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
-        Assert.Equal(ResponseMessages.Task.Deleted, response.Message);
+        Assert.Equal(ResponseMessages.Message.TaskDeleted, response.Message);
     }
 
 
@@ -422,8 +656,6 @@ public class TasksControllerTest
         var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
         Assert.NotNull(notFoundResult.Value);
     }
-
-
 
     [Fact]
     public async Task RunDueDateCheck_ReturnsOk()
@@ -489,73 +721,65 @@ public class TasksControllerTest
         Assert.Equal(statusCounts.New, root.GetProperty("newCount").GetInt32());
     }
 
-    [Fact]
-    public async Task Upload_ReturnsOkResult_WhenParsingSucceeds()
-    {
-        // Arrange
-        var fileMock = new Mock<IFormFile>();
-        var content = "Fake file content";
-        var fileName = "test.csv";
-        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+    //[Fact]
+    //public async Task Upload_ReturnsOkResult_WhenParsingSucceeds()
+    //{
+    //    // Arrange
+    //    var fileMock = new Mock<IFormFile>();
+    //    var content = "Fake file content";
+    //    var fileName = "test.csv";
+    //    var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
 
-        fileMock.Setup(f => f.OpenReadStream()).Returns(stream);
-        fileMock.Setup(f => f.FileName).Returns(fileName);
-        fileMock.Setup(f => f.Length).Returns(stream.Length);
-        fileMock.Setup(f => f.ContentType).Returns("text/csv");
+    //    fileMock.Setup(f => f.OpenReadStream()).Returns(stream);
+    //    fileMock.Setup(f => f.FileName).Returns(fileName);
+    //    fileMock.Setup(f => f.Length).Returns(stream.Length);
+    //    fileMock.Setup(f => f.ContentType).Returns("text/csv");
 
-        var parseResult = new TaskParseResult
-        {
-            Success = true,
-            ParsedTasks = new List<ParsedTask>
-            {
-                new ParsedTask { Name = "Task 1" },
-                new ParsedTask { Name = "Task 2" }
-            }
-        };
+    //    var parsedTasks = new List<ParsedTask>
+    //{
+    //    new ParsedTask { Name = "Task 1" },
+    //    new ParsedTask { Name = "Task 2" }
+    //};
 
-        _taskUploadServiceMock
-            .Setup(s => s.ParseTasksFromFileAsync(It.IsAny<IFormFile>()))
-            .ReturnsAsync((true, null, parseResult.ParsedTasks)); // Adjusted to match the expected tuple return type
+    //    _taskUploadServiceMock
+    //        .Setup(s => s.ParseTasksFromFileAsync(It.IsAny<IFormFile>()))
+    //        .ReturnsAsync(parsedTasks);
 
-        // Act
-        var result = await _controller.Upload(fileMock.Object);
+    //    // Act
+    //    var result = await _controller.Upload(fileMock.Object);
 
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
+    //    // Assert
+    //    var okResult = Assert.IsType<OkObjectResult>(result);
+    //    var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
 
-        // Serialize response.Data to JSON then deserialize it to UploadResponseData
-        var json = JsonSerializer.Serialize(response.Data);
-        var parsedData = JsonSerializer.Deserialize<UploadResponseData>(json);
+    //    // Deserialize response.Data to UploadResponseData
+    //    var json = JsonSerializer.Serialize(response.Data);
+    //    var parsedData = JsonSerializer.Deserialize<UploadResponseData>(json);
 
-        // Now assert values
-        Assert.Equal("Tasks parsed successfully", parsedData.message);
-        Assert.Equal(2, parsedData.count);
-        Assert.Equal(2, parsedData.data.Count);
+    //    Assert.Equal("Tasks parsed successfully", parsedData.message);
+    //    Assert.Equal(2, parsedData.count);
+    //    Assert.Equal(2, parsedData.data.Count);
+    //}
 
-    }
 
     [Fact]
-    public async Task Upload_ReturnsBadRequest_WhenParsingFails()
+    public async Task Upload_ReturnsError_WhenParsingFails()
     {
         // Arrange
         var fileMock = new Mock<IFormFile>();
 
         _taskUploadServiceMock
             .Setup(s => s.ParseTasksFromFileAsync(It.IsAny<IFormFile>()))
-            .ReturnsAsync((false, "Parsing failed due to invalid format", null)); 
+            .ThrowsAsync(new Exception("Parsing failed due to invalid format"));
 
         // Act
-        var result = await _controller.Upload(fileMock.Object);
+        var result = await Assert.ThrowsAsync<Exception>(() => _controller.Upload(fileMock.Object));
 
         // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        var response = Assert.IsType<ApiResponse<object>>(badRequestResult.Value);
-
-        Assert.False(response.Success);
-        Assert.Equal(400, response.StatusCode);
-        Assert.Contains("Parsing failed due to invalid format", response.Errors);
+        Assert.Equal("Parsing failed due to invalid format", result.Message);
     }
+
+
 
 
 

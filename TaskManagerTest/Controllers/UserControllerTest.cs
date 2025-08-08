@@ -25,6 +25,14 @@ namespace TaskManagerTest.Controllers
 
 
         [Fact]
+        public void Constructor_ThrowsInvalidOperationException_WhenUserServiceIsNull()
+        {
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => new UsersController(null));
+        }
+
+
+        [Fact]
         public async Task RefreshToken_ReturnsUnauthorized_WhenTokenIsMissing()
         {
             var context = new DefaultHttpContext(); // No cookie at all
@@ -39,8 +47,6 @@ namespace TaskManagerTest.Controllers
             var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
             Assert.Equal(401, unauthorized.StatusCode);
         }
-
-
 
         [Fact]
         public async Task RefreshToken_ReturnsNewToken_WhenTokenIsValid()
@@ -88,6 +94,33 @@ namespace TaskManagerTest.Controllers
             var result = await _controller.ToggleActiveStatus(1);
             var ok = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(200, ok.StatusCode);
+        }
+
+        [Fact]
+        public async Task CreateUser_ReturnsBadRequest_WhenUsernameMissing()
+        {
+            var request = new RegisterRequest { Username = "", Email = "user@test.com", Password = "pass" };
+            var result = await _controller.CreateUser(request);
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(400, badRequest.StatusCode);
+        }
+
+        [Fact]
+        public async Task CreateUser_ReturnsBadRequest_WhenEmailMissing()
+        {
+            var request = new RegisterRequest { Username = "user", Email = "", Password = "pass" };
+            var result = await _controller.CreateUser(request);
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(400, badRequest.StatusCode);
+        }
+
+        [Fact]
+        public async Task CreateUser_ReturnsBadRequest_WhenPasswordMissing()
+        {
+            var request = new RegisterRequest { Username = "user", Email = "user@test.com", Password = "" };
+            var result = await _controller.CreateUser(request);
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(400, badRequest.StatusCode);
         }
 
         [Fact]

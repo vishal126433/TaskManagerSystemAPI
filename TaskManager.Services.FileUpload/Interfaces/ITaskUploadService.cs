@@ -10,9 +10,10 @@ namespace TaskManager.Services.FileUpload.Interfaces
 {
     public interface ITaskUploadService
     {
-        Task<(bool Success, string ErrorMessage, List<ParsedTask> ParsedTasks)> ParseTasksFromFileAsync(IFormFile file);
+        Task<List<ParsedTask>> ParseTasksFromFileAsync(IFormFile file);
 
     }
+
 }
 
 

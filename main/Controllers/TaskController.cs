@@ -29,15 +29,8 @@ namespace AuthService.Controllers
         [HttpPost("create/{userId}")]
         public async Task<IActionResult> CreateTask(int userId, [FromBody] TaskItem task)
         {
-            try
-            {
-                var createdTask = await _taskService.CreateTaskAsync(userId, task);
-                return Ok(ApiResponse<object>.SuccessResponse(createdTask, 200, ResponseMessages.Task.Created));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ApiResponse<object>.SingleError(ex.Message, 400, "Invalid task data"));
-            }
+            var createdTask = await _taskService.CreateTaskAsync(userId, task);
+            return Ok(ApiResponse<object>.SuccessResponse(createdTask, 200, ResponseMessages.Message.TaskCreated));
         }
 
         [HttpGet("statuslist")]
@@ -65,7 +58,7 @@ namespace AuthService.Controllers
         public async Task<IActionResult> SearchTasks(int userId, string query)
         {
             if (string.IsNullOrWhiteSpace(query))
-                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptySearchQuery));
+                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Message.EmptySearchQuery));
 
             var tasks = await _taskService.SearchTasksByUserAsync(userId, query);
             return Ok(ApiResponse<object>.SuccessResponse(tasks));
@@ -75,7 +68,7 @@ namespace AuthService.Controllers
         public async Task<IActionResult> SearchTasks(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
-                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptySearchQuery));
+                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Message.EmptySearchQuery));
 
             var tasks = await _taskService.SearchTasksAsync(query);
             return Ok(ApiResponse<object>.SuccessResponse(tasks));
@@ -85,7 +78,7 @@ namespace AuthService.Controllers
         public async Task<IActionResult> UploadJson([FromBody] List<TaskImport> tasks)
         {
             if (tasks == null || !tasks.Any())
-                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptyTask)); 
+                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Message.EmptyTask)); 
 
             var errors = new List<string>();
             int successCount = 0;
@@ -106,8 +99,12 @@ namespace AuthService.Controllers
                     var user = await _userService.GetUserByIdAsync(parsedUserId);
                     if (user != null)
                     {
+                        assignedUsername = user.Username;
+
                         userId = parsedUserId;
-                    }else{
+                    }
+                    else
+                    {
                         errors.Add($"User not found for AssignTo '{dto.AssignTo}' in task '{dto.Name}'");
                         continue;
                     }
@@ -156,30 +153,15 @@ namespace AuthService.Controllers
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
-            var parseResult = await _taskUploadService.ParseTasksFromFileAsync(file);
-
-            if (!parseResult.Success)
-                return BadRequest(ApiResponse<object>.SingleError(parseResult.ErrorMessage));
-            return Ok(ApiResponse<object>.SuccessResponse(new
-            {
-                message = ResponseMessages.Task.Parsed,
-                count = parseResult.ParsedTasks.Count,
-                data = parseResult.ParsedTasks
-            }));
+            var parsedTasks = await _taskUploadService.ParseTasksFromFileAsync(file);
+            return Ok(parsedTasks);
         }
 
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetTasksByUserId(int userId)
         {
-            try
-            {
-                var tasks = await _taskService.GetTasksByUserIdAsync(userId);
-                return Ok(ApiResponse<List<TaskItem>>.SuccessResponse(tasks));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ApiResponse<string>.ErrorResponse(new List<string> { ResponseMessages.Task.RetrievalFailed }, 500));
-            }
+            var tasks = await _taskService.GetTasksByUserIdAsync(userId);
+            return Ok(ApiResponse<List<TaskItem>>.SuccessResponse(tasks));
         }
 
         [HttpGet]
@@ -202,9 +184,9 @@ namespace AuthService.Controllers
         {
             var deleted = await _taskService.DeleteTaskAsync(id);
             if (!deleted)
-                return NotFound(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptyTask));
+                return NotFound(ApiResponse<object>.SingleError(ResponseMessages.Message.EmptyTask));
 
-            return Ok(ApiResponse<object>.SuccessResponse(null, 200, ResponseMessages.Task.Deleted));
+            return Ok(ApiResponse<object>.SuccessResponse(null, 200, ResponseMessages.Message.TaskDeleted));
         }
 
         [HttpPut("{id}")]
@@ -212,16 +194,16 @@ namespace AuthService.Controllers
         {
             var result = await _taskService.UpdateTaskAsync(id, updatedTask);
             if (result == null)
-                return NotFound(ApiResponse<object>.SingleError(ResponseMessages.Task.EmptyTask));
+                return NotFound(ApiResponse<object>.SingleError(ResponseMessages.Message.EmptyTask));
 
-            return Ok(ApiResponse<object>.SuccessResponse(result, 200, ResponseMessages.Task.Updated));
+            return Ok(ApiResponse<object>.SuccessResponse(result, 200, ResponseMessages.Message.TaskUpdated));
         }
 
         [HttpPost("run")]
         public async Task<IActionResult> RunDueDateCheck(CancellationToken cancellationToken)
         {
             await _taskStateService.UpdateTaskStatesAsync(cancellationToken);
-            return Ok(ApiResponse<object>.SuccessResponse(null, 200, ResponseMessages.Task.Run));
+            return Ok(ApiResponse<object>.SuccessResponse(null, 200, ResponseMessages.Message.Run));
         }
     }
 }

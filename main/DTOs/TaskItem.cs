@@ -19,6 +19,7 @@
 
     public int? UserId { get; set; }
     public string? AssignedTo { get; set; }
+  
     //public string AssignedTo { get; set; }  // maps to Username in Tasks table
 
 

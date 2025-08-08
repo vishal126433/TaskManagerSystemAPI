@@ -18,31 +18,22 @@ namespace TaskManager.Services.FileUpload.Services
             _parserFactory = parserFactory;
         }
 
-        public async Task<(bool Success, string ErrorMessage, List<ParsedTask> ParsedTasks)> ParseTasksFromFileAsync(IFormFile file)
+        public async Task<List<ParsedTask>> ParseTasksFromFileAsync(IFormFile file)
         {
-            try
-            {
-                if (file == null || file.Length == 0)
-                    return (false, "No file uploaded.", null);
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("No file uploaded.");
 
-                var extension = Path.GetExtension(file.FileName);
-                
-                var parser = _parserFactory.GetParser(extension);
-                if (parser == null)
-                    return (false, "No parser available for this file type.", null);
+            var extension = Path.GetExtension(file.FileName);
+            var parser = _parserFactory.GetParser(extension);
 
-                var parsedTasks = await parser.ParseAsync(file);
-                return (true, "", parsedTasks);
-            }
-            catch (NotSupportedException ex)
-            {
-                return (false, ex.Message, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, ex.Message, null);
-            }
+            if (parser == null)
+                throw new NotSupportedException($"No parser available for the file type '{extension}'.");
+
+            var parsedTasks = await parser.ParseAsync(file);
+
+            return parsedTasks;
         }
+
     }
 
 }

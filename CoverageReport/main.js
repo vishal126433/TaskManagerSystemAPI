@@ -216,13 +216,13 @@ var assemblies = [
       { "name": "TaskManager.Services.FileUpload.Factories.ParserFactory", "rp": "FileParser_ParserFactory.html", "cl": 0, "ucl": 12, "cal": 12, "tl": 32, "cb": 0, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Services.FileUpload.Models.ParsedTask", "rp": "FileParser_ParsedTask.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Services.FileUpload.Parsers.ExcelTaskDataParser", "rp": "FileParser_ExcelTaskDataParser.html", "cl": 0, "ucl": 40, "cal": 40, "tl": 72, "cb": 0, "tb": 38, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "TaskManager.Services.FileUpload.Services.TaskUploadService", "rp": "FileParser_TaskUploadService.html", "cl": 0, "ucl": 21, "cal": 21, "tl": 70, "cb": 0, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Services.FileUpload.Services.TaskUploadService", "rp": "FileParser_TaskUploadService.html", "cl": 0, "ucl": 24, "cal": 24, "tl": 61, "cb": 0, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
     "name": "TaskManager",
     "classes": [
-      { "name": "AuthService.Controllers.TasksController", "rp": "TaskManager_TasksController.html", "cl": 201, "ucl": 1, "cal": 202, "tl": 227, "cb": 120, "tb": 160, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "AuthService.Controllers.UsersController", "rp": "TaskManager_UsersController.html", "cl": 46, "ucl": 0, "cal": 46, "tl": 94, "cb": 15, "tb": 16, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "AuthService.Controllers.TasksController", "rp": "TaskManager_TasksController.html", "cl": 204, "ucl": 0, "cal": 204, "tl": 209, "cb": 169, "tb": 198, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "AuthService.Controllers.UsersController", "rp": "TaskManager_UsersController.html", "cl": 46, "ucl": 0, "cal": 46, "tl": 94, "cb": 16, "tb": 16, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "AuthService.Data.AppDbContext", "rp": "TaskManager_AppDbContext.html", "cl": 0, "ucl": 6, "cal": 6, "tl": 20, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "AuthService.Data.AppDbContextFactory", "rp": "TaskManager_AppDbContextFactory.html", "cl": 0, "ucl": 12, "cal": 12, "tl": 32, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "AuthService.Models.Status", "rp": "TaskManager_Status.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 11, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
@@ -230,7 +230,7 @@ var assemblies = [
       { "name": "ParseResult", "rp": "TaskManager_ParseResult.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 6, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Program", "rp": "TaskManager_Program.html", "cl": 0, "ucl": 45, "cal": 45, "tl": 90, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "RegisterRequest", "rp": "TaskManager_RegisterRequest.html", "cl": 3, "ucl": 1, "cal": 4, "tl": 7, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "TaskItem", "rp": "TaskManager_TaskItem.html", "cl": 11, "ucl": 0, "cal": 11, "tl": 25, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskItem", "rp": "TaskManager_TaskItem.html", "cl": 11, "ucl": 0, "cal": 11, "tl": 26, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.DTOs.TaskImport", "rp": "TaskManager_TaskImport.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 24, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.DTOs.TaskParseResult", "rp": "TaskManager_TaskParseResult.html", "cl": 2, "ucl": 1, "cal": 3, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.DTOs.TaskStatusCount", "rp": "TaskManager_TaskStatusCount.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 9, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
@@ -321,6 +321,12 @@ var riskHotspots = [
     ]},
   {
     "assembly": "TaskManager", "class": "AuthService.Controllers.TasksController", "reportPath": "TaskManager_TasksController.html", "methodName": "UploadJson()", "methodShortName": "UploadJson()", "fileIndex": 0, "line": 85,
+    "metrics": [
+      { "value": 22, "exceeded": false },
+      { "value": 22, "exceeded": true },
+    ]},
+  {
+    "assembly": "TaskManager", "class": "AuthService.Controllers.TasksController", "reportPath": "TaskManager_TasksController.html", "methodName": "UploadJson()", "methodShortName": "UploadJson()", "fileIndex": 0, "line": 79,
     "metrics": [
       { "value": 22, "exceeded": false },
       { "value": 22, "exceeded": true },

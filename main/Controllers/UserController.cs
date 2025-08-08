@@ -24,7 +24,7 @@ namespace AuthService.Controllers
         {
             var refreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(refreshToken))
-                return Unauthorized(ApiResponse<string>.SingleError(ResponseMessages.User.NoRefreshToken));
+                return Unauthorized(ApiResponse<string>.SingleError(ResponseMessages.Message.NoRefreshToken));
 
             var newToken = await _userService.RefreshTokenAsync(refreshToken);
             return Ok(ApiResponse<object>.SuccessResponse(newToken));
@@ -43,7 +43,7 @@ namespace AuthService.Controllers
         {
             var result = await _userService.ToggleUserActiveStatusAsync(id);
             if (result == null)
-                return NotFound(ApiResponse<string>.SingleError(ResponseMessages.User.NotFound));
+                return NotFound(ApiResponse<string>.SingleError(ResponseMessages.Message.UserNotFound));
 
             return Ok(ApiResponse<object>.SuccessResponse(new { IsActive = result }));
         }
@@ -57,11 +57,11 @@ namespace AuthService.Controllers
                 string.IsNullOrWhiteSpace(request.Email) ||
                 string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest(ApiResponse<string>.SingleError(ResponseMessages.User.RequiredFieldsMissing));
+                return BadRequest(ApiResponse<string>.SingleError(ResponseMessages.Message.RequiredFieldsMissing));
             }
 
             var user = await _userService.CreateUserAsync(request);
-            return Ok(ApiResponse<object>.SuccessResponse(new { user.Username, user.Email, user.Role },200,ResponseMessages.User.Created));
+            return Ok(ApiResponse<object>.SuccessResponse(new { user.Username, user.Email, user.Role },200,ResponseMessages.Message.UserCreated));
 
         }
 
@@ -70,11 +70,11 @@ namespace AuthService.Controllers
         {
             var user = await _userService.UpdateUserAsync(id, updatedUser);
             if (user == null)
-                return NotFound(ApiResponse<string>.SingleError(ResponseMessages.User.NotFound));
+                return NotFound(ApiResponse<string>.SingleError(ResponseMessages.Message.UserNotFound));
 
             return Ok(ApiResponse<object>.SuccessResponse(
                 user,
-                message: ResponseMessages.User.Updated));
+                message: ResponseMessages.Message.UserUpdated));
         }
 
 
@@ -83,11 +83,11 @@ public async Task<IActionResult> DeleteUser(int id)
 {
     var success = await _userService.DeleteUserAsync(id);
     if (!success)
-        return NotFound(ApiResponse<string>.SingleError(ResponseMessages.User.NotFound));
+        return NotFound(ApiResponse<string>.SingleError(ResponseMessages.Message.UserNotFound));
 
     return Ok(ApiResponse<string>.SuccessResponse(
         data: null,
-        message: ResponseMessages.User.Deleted));
+        message: ResponseMessages.Message.UserDeleted));
 }
 
     }
