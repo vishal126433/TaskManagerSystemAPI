@@ -18,10 +18,10 @@ namespace TaskManager.Services
 
         public TaskStateService(AppDbContext dbContext, ILogger<TaskStateService> logger, IEmailService emailService, IOptions<TaskNotificationSettings> settings)
         {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext), "dbContext cannot be null.");
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "logger cannot be null.");
-            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService), "emailService cannot be null.");
-            _settings = settings.Value ?? throw new ArgumentNullException(nameof(settings.Value), "settings.Value cannot be null.");
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext), ResponseMessages.Message.DBcontextNull);
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), ResponseMessages.Message.LoggerNull);
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService), ResponseMessages.Message.EmailServiceNull);
+            _settings = settings.Value ?? throw new ArgumentNullException(nameof(settings.Value), ResponseMessages.Message.SettingsNull);
 
 
         }
@@ -32,7 +32,7 @@ namespace TaskManager.Services
             var nextDay = DateHelper.Tomorrow;
 
             var allTasks = await _dbContext.Tasks.ToListAsync(cancellationToken);
-            _logger.LogInformation("inside task state service");
+            _logger.LogInformation(ResponseMessages.Message.TaskStateService);
 
             foreach (var task in allTasks)
             {

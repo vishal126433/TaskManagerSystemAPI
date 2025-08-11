@@ -16,7 +16,7 @@ namespace AuthService.Controllers
 
         public UsersController(IUserService userService)
         {
-            _userService = userService ?? throw new InvalidOperationException("UserService not initialized.");
+            _userService = userService ?? throw new InvalidOperationException(ResponseMessages.Message.NoUserServiceInitialised);
         }
 
         [HttpPost("refresh-token")]

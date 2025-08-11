@@ -13,17 +13,11 @@ namespace TaskManager.Services
         private readonly ILogger<TaskService> _logger;
         private readonly IUserService _userService;
 
-        //public UsersController(IUserService userService)
-        //{
-        //    _userService = userService ?? throw new InvalidOperationException("UserService not initialized.");
-        //}
-
-
         public TaskService(AppDbContext db, ILogger<TaskService> logger, IUserService userService)
         {
-            _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "logger cannot be null.");
-            _userService = userService ?? throw new InvalidOperationException("UserService not initialized.");
+            _db = db ?? throw new ArgumentNullException(nameof(db), ResponseMessages.Message.DBcontextNull);
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), ResponseMessages.Message.LoggerNull);
+            _userService = userService ?? throw new InvalidOperationException(ResponseMessages.Message.NoUserServiceInitialised);
 
         }
 
@@ -40,8 +34,8 @@ namespace TaskManager.Services
                     string.IsNullOrWhiteSpace(task.Priority) ||
                     string.IsNullOrWhiteSpace(task.Status))
                 {
-                    _logger.LogWarning("Task creation failed: missing required fields for user {UserId}", userId);
-                    throw new ArgumentException("All fields are required.");
+                    _logger.LogWarning(ResponseMessages.Message.TaskCreationFailed, userId);
+                    throw new ArgumentException(ResponseMessages.Message.AllFields);
                 }
 
                 task.UserId = (userId == 0) ? null : userId;
@@ -55,12 +49,12 @@ namespace TaskManager.Services
                 _db.Tasks.Add(task);
                 await _db.SaveChangesAsync();
 
-                _logger.LogInformation("Task created successfully for user {UserId}: {@Task}", userId, task);
+                _logger.LogInformation(ResponseMessages.Message.TaskCreationLog, userId, task);
                 return task;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating task for user {UserId}", userId);
+                _logger.LogError(ex, ResponseMessages.Message.TaskCreationFail, userId);
                 throw;
             }
         }
@@ -148,12 +142,12 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Fetching status list");
+                _logger.LogInformation(ResponseMessages.Message.FetchStatusList);
                 return await _db.Statuses.Select(s => s.Name.ToLower()).Distinct().ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching status list");
+                _logger.LogError(ex, ResponseMessages.Message.FetchStatusListError);
                 throw;
             }
         }
@@ -161,12 +155,12 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Fetching priority list");
+                _logger.LogInformation(ResponseMessages.Message.FetchPriorityList);
                 return await _db.Priority.Select(s => s.Name.ToLower()).Distinct().ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching priority list");
+                _logger.LogError(ex, ResponseMessages.Message.FetchPriorityListError);
                 throw;
             }
         }
@@ -174,12 +168,12 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Fetching type list");
+                _logger.LogInformation(ResponseMessages.Message.FetchTypeList);
                 return await _db.Types.Select(s => s.Name.ToLower()).Distinct().ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching type list");
+                _logger.LogError(ex, ResponseMessages.Message.FetchTypeListError);
                 throw;
             }
         }
@@ -188,12 +182,12 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Fetching tasks for user {UserId}", userId);
+                _logger.LogInformation(ResponseMessages.Message.FetchTask, userId);
                 return await _db.Tasks.Where(t => t.UserId == userId).ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching tasks for user {UserId}", userId);
+                _logger.LogError(ex, ResponseMessages.Message.FetchTaskuseridError, userId);
                 throw;
             }
         }
@@ -202,7 +196,7 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Fetching paginated tasks: Page {PageNumber}, PageSize {PageSize}", pageNumber, pageSize);
+                _logger.LogInformation(ResponseMessages.Message.FetchpaginatedTask, pageNumber, pageSize);
 
                 var query = _db.Tasks.AsQueryable();
                 var totalCount = await query.CountAsync();
@@ -214,7 +208,7 @@ namespace TaskManager.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching paginated tasks");
+                _logger.LogError(ex, ResponseMessages.Message.FetchpaginatedTaskError);
                 throw;
             }
         }
@@ -223,12 +217,12 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Fetching all tasks (for count summary)");
+                _logger.LogInformation(ResponseMessages.Message.FetchTaskCount);
                 return await _db.Tasks.ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching all tasks");
+                _logger.LogError(ex, ResponseMessages.Message.FetchTaskError);
                 throw;
             }
         }
@@ -237,7 +231,7 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Searching tasks for user {UserId} with query '{Query}'", userId, query);
+                _logger.LogInformation(ResponseMessages.Message.SearchTaskUserId, userId, query);
                 return await _db.Tasks
                     .Where(t => t.UserId == userId && (t.Name.Contains(query) || t.Description.Contains(query)))
                     .OrderBy(t => t.Name)
@@ -245,7 +239,7 @@ namespace TaskManager.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error searching tasks for user {UserId}", userId);
+                _logger.LogError(ex, ResponseMessages.Message.SearchTaskUserIdError, userId);
                 throw;
             }
         }
@@ -254,7 +248,7 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Searching tasks with query '{Query}'", query);
+                _logger.LogInformation(ResponseMessages.Message.SearchTask, query);
                 return await _db.Tasks
                     .Where(t => t.Name.Contains(query) || t.Description.Contains(query))
                     .OrderBy(t => t.Name)
@@ -262,7 +256,7 @@ namespace TaskManager.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error searching tasks");
+                _logger.LogError(ex, ResponseMessages.Message.SearchTaskError);
                 throw;
             }
         }

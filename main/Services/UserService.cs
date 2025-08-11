@@ -3,6 +3,7 @@ using AuthService.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using TaskManager.Helpers;
 using TaskManager.Interfaces;
 
 namespace TaskManager.Services
@@ -15,16 +16,16 @@ namespace TaskManager.Services
 
         public UserService(HttpClient http, AppDbContext context, ILogger<UserService> logger)
         {
-            _http = http ?? throw new ArgumentNullException(nameof(http), "HttpClient cannot be null.");
-            _context = context ?? throw new ArgumentNullException(nameof(context), "DbContext cannot be null.");
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+            _http = http ?? throw new ArgumentNullException(nameof(http), ResponseMessages.Message.HttpClientNull);
+            _context = context ?? throw new ArgumentNullException(nameof(context), ResponseMessages.Message.DBcontextNull);
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger), ResponseMessages.Message.LoggerNull);
         }
 
         public async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
         {
             try
             {
-                _logger.LogInformation("Refreshing token for provided refresh token");
+                _logger.LogInformation(ResponseMessages.Message.RefreshingToken);
 
                 var message = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7027/auth/refresh-token");
                 message.Headers.Add("Cookie", $"refreshToken={refreshToken}");
@@ -33,16 +34,16 @@ namespace TaskManager.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation("Refresh token succeeded");
+                    _logger.LogInformation(ResponseMessages.Message.TokenSucceed);
                     return await response.Content.ReadFromJsonAsync<TokenResponse>();
                 }
 
-                _logger.LogWarning("Refresh token failed with status code {StatusCode}", response.StatusCode);
-                throw new Exception("Refresh token failed");
+                _logger.LogWarning(ResponseMessages.Message.TokenFailedcode, response.StatusCode);
+                throw new Exception(ResponseMessages.Message.TokenFailed);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error refreshing token");
+                _logger.LogError(ex, ResponseMessages.Message.TokenError);
                 throw;
             }
         }
@@ -51,14 +52,14 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Fetching all users");
+                _logger.LogInformation(ResponseMessages.Message.FetchingUser);
                 var users = await _context.Users.ToListAsync();
-                _logger.LogInformation("Fetched {Count} users", users.Count);
+                _logger.LogInformation(ResponseMessages.Message.UsersFetched, users.Count);
                 return users;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching all users");
+                _logger.LogError(ex, ResponseMessages.Message.ErrorUserFetching);
                 throw;
             }
         }
@@ -67,7 +68,7 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Attempting to create user with username '{Username}'", request.Username);
+                _logger.LogInformation(ResponseMessages.Message.AttemptCreateUser, request.Username);
 
                 var passwordHasher = new PasswordHasher<User>();
 
@@ -83,12 +84,12 @@ namespace TaskManager.Services
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("User created successfully with Id {UserId}", user.Id);
+                _logger.LogInformation(ResponseMessages.Message.CreateUserWithId, user.Id);
                 return user;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating user with username '{Username}'", request.Username);
+                _logger.LogError(ex, ResponseMessages.Message.CreateUserError, request.Username);
                 throw;
             }
         }
@@ -97,12 +98,12 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Attempting to update user with Id {UserId}", id);
+                _logger.LogInformation(ResponseMessages.Message.AttemptUpdateUser, id);
 
                 var user = await _context.Users.FindAsync(id);
                 if (user == null)
                 {
-                    _logger.LogWarning("Update failed: user with Id {UserId} not found", id);
+                    _logger.LogWarning(ResponseMessages.Message.UpdateUserFailed, id);
                     return null;
                 }
 
@@ -113,12 +114,12 @@ namespace TaskManager.Services
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("User with Id {UserId} updated successfully", id);
+                _logger.LogInformation(ResponseMessages.Message.UserUpdatedLog, id);
                 return user;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating user with Id {UserId}", id);
+                _logger.LogError(ex,ResponseMessages.Message.UserUpdatedErrorLog, id);
                 throw;
             }
         }
@@ -132,24 +133,24 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Attempting to delete user with Id {UserId}", id);
+                _logger.LogInformation(ResponseMessages.Message.AttemptDeleteUser, id);
 
                 var user = await _context.Users.FindAsync(id);
                 if (user == null)
                 {
-                    _logger.LogWarning("Delete failed: user with Id {UserId} not found", id);
+                    _logger.LogWarning(ResponseMessages.Message.DeleteUserFailed, id);
                     return false;
                 }
 
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("User with Id {UserId} deleted successfully", id);
+                _logger.LogInformation(ResponseMessages.Message.UserDeletedLog, id);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting user with Id {UserId}", id);
+                _logger.LogError(ex, ResponseMessages.Message.UserDeletedErrorLog, id);
                 throw;
             }
         }
@@ -157,24 +158,24 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Toggling active status for user with Id {UserId}", id);
+                _logger.LogInformation(ResponseMessages.Message.ToggleActiveStatus, id);
 
                 var user = await _context.Users.FindAsync(id);
                 if (user == null)
                 {
-                    _logger.LogWarning("User with Id {UserId} not found", id);
+                    _logger.LogWarning(ResponseMessages.Message.UserIdNotFound, id);
                     return null;
                 }
 
                 user.IsActive = !user.IsActive;
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("User with Id {UserId} active status set to {IsActive}", id, user.IsActive);
+                _logger.LogInformation(ResponseMessages.Message.UserIdActiveStatus, id, user.IsActive);
                 return user.IsActive;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error toggling active status for user with Id {UserId}", id);
+                _logger.LogError(ex, ResponseMessages.Message.ToggleActiveStatusError, id);
                 throw;
             }
         }

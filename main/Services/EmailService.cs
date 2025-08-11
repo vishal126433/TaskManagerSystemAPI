@@ -13,7 +13,7 @@ namespace TaskManager.Services
 
         public EmailService(IOptions<SmtpSettings> smtpOptions)
         {
-            _smtpSettings = smtpOptions.Value ?? throw new ArgumentNullException(nameof(smtpOptions.Value), "smtpOptions.Value cannot be null.");
+            _smtpSettings = smtpOptions.Value ?? throw new ArgumentNullException(nameof(smtpOptions.Value),ResponseMessages.Message.SmtpOptionNull);
         }
 
         public async Task SendEmailAsync(EmailMessage message)
