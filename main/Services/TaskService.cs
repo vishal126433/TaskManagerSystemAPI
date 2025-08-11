@@ -11,11 +11,20 @@ namespace TaskManager.Services
     {
         private readonly AppDbContext _db;
         private readonly ILogger<TaskService> _logger;
+        private readonly IUserService _userService;
 
-        public TaskService(AppDbContext db, ILogger<TaskService> logger)
+        //public UsersController(IUserService userService)
+        //{
+        //    _userService = userService ?? throw new InvalidOperationException("UserService not initialized.");
+        //}
+
+
+        public TaskService(AppDbContext db, ILogger<TaskService> logger, IUserService userService)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db), "DbContext cannot be null.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger), "logger cannot be null.");
+            _userService = userService ?? throw new InvalidOperationException("UserService not initialized.");
+
         }
 
         public async Task<TaskItem> CreateTaskAsync(int? userId, TaskItem task)
@@ -257,5 +266,84 @@ namespace TaskManager.Services
                 throw;
             }
         }
+
+        public async Task<object> UploadTasksAsync(List<TaskImport> tasks)
+        {
+            var errors = new List<string>();
+            int successCount = 0;
+
+            foreach (var dto in tasks)
+            {
+                // Date validation
+                if (!DateTime.TryParse(dto.DueDate, out var parsedDueDate))
+                {
+                    errors.Add($"Invalid date format for task '{dto.Name}'");
+                    continue;
+                }
+
+                // User assignment
+                int userId = 0;
+                string assignedUsername = string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(dto.AssignTo) && int.TryParse(dto.AssignTo, out int parsedUserId))
+                {
+                    var user = await _userService.GetUserByIdAsync(parsedUserId);
+                    if (user != null)
+                    {
+                        assignedUsername = user.Username;
+                        userId = parsedUserId;
+                    }
+                    else
+                    {
+                        errors.Add($"User not found for AssignTo '{dto.AssignTo}' in task '{dto.Name}'");
+                        continue;
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(dto.AssignTo))
+                {
+                    errors.Add($"Invalid AssignTo value '{dto.AssignTo}' for task '{dto.Name}'");
+                    continue;
+                }
+
+                // Create task entity
+                var task = new TaskItem
+                {
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Duedate = parsedDueDate,
+                    Status = dto.Status,
+                    State = dto.Status switch
+                    {
+                        "new" or "in progress" => TaskStates.Open,
+                        "completed" => TaskStates.Closed,
+                        _ => dto.Status.ToLower()
+                    },
+                    Type = dto.Type,
+                    Priority = dto.Priority,
+                    UserId = userId,
+                    AssignedTo = assignedUsername
+                };
+
+                try
+                {
+                    await CreateTaskAsync(task.UserId, task);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to create task '{TaskName}'", dto.Name);
+                    errors.Add($"Failed to create task '{dto.Name}': {ex.Message}");
+                }
+            }
+
+            return new
+            {
+                message = "Tasks processed.",
+                successCount,
+                errorCount = errors.Count,
+                errors
+            };
+        }
+
     }
 }

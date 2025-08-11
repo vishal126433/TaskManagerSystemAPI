@@ -78,76 +78,11 @@ namespace AuthService.Controllers
         public async Task<IActionResult> UploadJson([FromBody] List<TaskImport> tasks)
         {
             if (tasks == null || !tasks.Any())
-                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Message.EmptyTask)); 
+                return BadRequest(ApiResponse<object>.SingleError(ResponseMessages.Message.EmptyTask));
 
-            var errors = new List<string>();
-            int successCount = 0;
+            var result = await _taskService.UploadTasksAsync(tasks);
 
-            foreach (var dto in tasks)
-            {
-                if (!DateTime.TryParse(dto.DueDate, out var parsedDueDate))
-                {
-                    errors.Add($"Invalid date format for task '{dto.Name}'");
-                    continue;
-                }
-
-                int userId = 0;
-                string assignedUsername = string.Empty;
-
-                if (!string.IsNullOrWhiteSpace(dto.AssignTo) && int.TryParse(dto.AssignTo, out int parsedUserId))
-                {
-                    var user = await _userService.GetUserByIdAsync(parsedUserId);
-                    if (user != null)
-                    {
-                        assignedUsername = user.Username;
-
-                        userId = parsedUserId;
-                    }
-                    else
-                    {
-                        errors.Add($"User not found for AssignTo '{dto.AssignTo}' in task '{dto.Name}'");
-                        continue;
-                    }
-                }
-                else if (!string.IsNullOrWhiteSpace(dto.AssignTo))
-                {
-                    errors.Add($"Invalid AssignTo value '{dto.AssignTo}' for task '{dto.Name}'");
-                    continue;
-                }
-
-                var task = new TaskItem
-                {
-                    Name = dto.Name,
-                    Description = dto.Description,
-                    Duedate = parsedDueDate,
-                    Status = dto.Status,
-                    State = dto.Status switch
-                    {
-                        "new" or "in progress" => TaskStates.Open,
-                        "completed" => TaskStates.Closed,
-                        _ => dto.Status.ToLower()
-                    },
-                    Type = dto.Type,
-                    Priority = dto.Priority,
-                    UserId = userId,
-                    AssignedTo = assignedUsername
-                };
-
-                try
-                {
-                    await _taskService.CreateTaskAsync(task.UserId, task);
-                    successCount++;
-                }
-                catch (Exception ex)
-                {errors.Add($"Failed to create task '{dto.Name}': {ex.Message}");}
-            }
-            return Ok(ApiResponse<object>.SuccessResponse(new
-            {
-                message = "Tasks processed.",
-                successCount,
-                errorCount = errors.Count,
-                errors
-            }));
+            return Ok(ApiResponse<object>.SuccessResponse(result));
         }
 
         [HttpPost("upload")]

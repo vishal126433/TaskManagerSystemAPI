@@ -69,5 +69,8 @@ namespace TaskManager.Interfaces
         Task<List<string>> GetPriorityListAsync();
         Task<List<TaskItem>> GetAllTasksAsync();
         Task<TaskStatusCount> GetTaskStatusCountsAsync();
+
+        Task<object> UploadTasksAsync(List<TaskImport> tasks);
+
     }
 }
