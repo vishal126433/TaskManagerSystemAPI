@@ -266,6 +266,26 @@ public class TasksControllerTest
         var response = Assert.IsType<ApiResponse<object>>(badResult.Value);
         Assert.Contains("No Task Provided.", response.Errors[0]);
     }
+    [Fact]
+    public async Task UploadJson_ReturnsOk_WhenServiceReturnsEmptyList()
+    {
+        // Arrange
+        var emptyTasks = new List<TaskImport>
+    {
+        new TaskImport { Name = "EmptyTest", DueDate = "2025-01-01", Status = "new", Type = "bug", Priority = "low" }
+    };
+
+        _taskServiceMock
+            .Setup(x => x.UploadTasksAsync(It.IsAny<List<TaskImport>>()))
+            .ReturnsAsync(new List<TaskItem>());
+
+        // Act
+        var result = await _controller.UploadJson(emptyTasks);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.NotNull(okResult.Value);
+    }
 
     [Fact]
     public async Task GetTasksByUserId_ReturnsOk()
@@ -429,47 +449,6 @@ public class TasksControllerTest
         Assert.Equal(statusCounts.New, root.GetProperty("newCount").GetInt32());
     }
 
-    //[Fact]
-    //public async Task Upload_ReturnsOkResult_WhenParsingSucceeds()
-    //{
-    //    // Arrange
-    //    var fileMock = new Mock<IFormFile>();
-    //    var content = "Fake file content";
-    //    var fileName = "test.csv";
-    //    var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
-
-    //    fileMock.Setup(f => f.OpenReadStream()).Returns(stream);
-    //    fileMock.Setup(f => f.FileName).Returns(fileName);
-    //    fileMock.Setup(f => f.Length).Returns(stream.Length);
-    //    fileMock.Setup(f => f.ContentType).Returns("text/csv");
-
-    //    var parsedTasks = new List<ParsedTask>
-    //{
-    //    new ParsedTask { Name = "Task 1" },
-    //    new ParsedTask { Name = "Task 2" }
-    //};
-
-    //    _taskUploadServiceMock
-    //        .Setup(s => s.ParseTasksFromFileAsync(It.IsAny<IFormFile>()))
-    //        .ReturnsAsync(parsedTasks);
-
-    //    // Act
-    //    var result = await _controller.Upload(fileMock.Object);
-
-    //    // Assert
-    //    var okResult = Assert.IsType<OkObjectResult>(result);
-    //    var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
-
-    //    // Deserialize response.Data to UploadResponseData
-    //    var json = JsonSerializer.Serialize(response.Data);
-    //    var parsedData = JsonSerializer.Deserialize<UploadResponseData>(json);
-
-    //    Assert.Equal("Tasks parsed successfully", parsedData.message);
-    //    Assert.Equal(2, parsedData.count);
-    //    Assert.Equal(2, parsedData.data.Count);
-    //}
-
-
     [Fact]
     public async Task Upload_ReturnsError_WhenParsingFails()
     {
@@ -486,6 +465,40 @@ public class TasksControllerTest
         // Assert
         Assert.Equal("Parsing failed due to invalid format", result.Message);
     }
+
+    [Fact]
+    public async Task Upload_ReturnsOkResult_WhenParsingSucceeds()
+    {
+        // Arrange
+        var fileMock = new Mock<IFormFile>();
+        var content = "Fake file content";
+        var fileName = "test.csv";
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+
+        fileMock.Setup(f => f.OpenReadStream()).Returns(stream);
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(stream.Length);
+        fileMock.Setup(f => f.ContentType).Returns("text/csv");
+
+        var parsedTasks = new List<ParsedTask>
+    {
+        new ParsedTask { Name = "Task 1" },
+        new ParsedTask { Name = "Task 2" }
+    };
+
+        _taskUploadServiceMock
+            .Setup(s => s.ParseTasksFromFileAsync(It.IsAny<IFormFile>()))
+            .ReturnsAsync(parsedTasks);
+
+        // Act
+        var result = await _controller.Upload(fileMock.Object);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.NotNull(okResult.Value);
+    }
+
+   
 
 
 

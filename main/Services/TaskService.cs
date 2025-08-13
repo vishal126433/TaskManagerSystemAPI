@@ -26,7 +26,7 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Attempting to create task for user {UserId}", userId);
+                _logger.LogInformation(ResponseMessages.Message.AttemptTaskCreateId, userId);
                 if (string.IsNullOrWhiteSpace(task.Name) ||
                     string.IsNullOrWhiteSpace(task.Description) ||
                     !task.Duedate.HasValue ||
@@ -72,24 +72,24 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Attempting to delete task with Id {TaskId}", id);
+                _logger.LogInformation(ResponseMessages.Message.AttemptTaskDeletedId, id);
 
                 var task = await _db.Tasks.FindAsync(id);
                 if (task == null)
                 {
-                    _logger.LogWarning("Delete failed: task with Id {TaskId} not found", id);
+                    _logger.LogWarning(ResponseMessages.Message.TaskDeletedNotFound, id);
                     return false;
                 }
 
                 _db.Tasks.Remove(task);
                 await _db.SaveChangesAsync();
 
-                _logger.LogInformation("Task with Id {TaskId} deleted successfully", id);
+                _logger.LogInformation(ResponseMessages.Message.TaskDeletedId, id);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting task with Id {TaskId}", id);
+                _logger.LogError(ex,ResponseMessages.Message.TaskDeletedIdError, id);
                 throw;
             }
         }
@@ -98,12 +98,12 @@ namespace TaskManager.Services
         {
             try
             {
-                _logger.LogInformation("Attempting to update task with Id {TaskId}", id);
+                _logger.LogInformation(ResponseMessages.Message.AttemptTaskUpdateId, id);
 
                 var existingTask = await _db.Tasks.FindAsync(id);
                 if (existingTask == null)
                 {
-                    _logger.LogWarning("Update failed: task with Id {TaskId} not found", id);
+                    _logger.LogWarning(ResponseMessages.Message.TaskUpdateNotFound, id);
                     return null;
                 }
 
@@ -127,12 +127,12 @@ namespace TaskManager.Services
 
                 await _db.SaveChangesAsync();
 
-                _logger.LogInformation("Task with Id {TaskId} updated successfully", id);
+                _logger.LogInformation(ResponseMessages.Message.TaskUpdatedId, id);
                 return existingTask;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating task with Id {TaskId}", id);
+                _logger.LogError(ex, ResponseMessages.Message.TaskUpdatedIdError, id);
                 throw;
             }
         }

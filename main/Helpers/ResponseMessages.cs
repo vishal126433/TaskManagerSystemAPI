@@ -58,9 +58,7 @@ namespace TaskManager.Helpers
             public const string UserIdNotFound = "User with Id {UserId} not found";
             public const string UserIdActiveStatus = "User with Id {UserId} active status set to {IsActive}";
             public const string ToggleActiveStatusError = "Error toggling active status for user with Id {UserId}";
-            public const string EmailServiceNull = "emailService cannot be null.";
-
-
+            public const string EmailServiceNull = "EmailService cannot be null.";
             public const string SettingsNull = "settings Value cannot be null.";
             public const string TaskStateService = "inside task state service";
             public const string SmtpOptionNull = "smtpOptions Value cannot be null.";
@@ -68,7 +66,6 @@ namespace TaskManager.Helpers
             public const string TaskCreationLog = "Task created successfully for user {UserId}: {@Task}";
             public const string TaskCreationFail = "Error creating task for user {UserId}";
             public const string SearchTask = "Searching tasks with query '{Query}'";
-
             public const string SearchTaskError = "Error searching tasks";
             public const string SearchTaskUserId = "Searching tasks for user {UserId} with query '{Query}'";
             public const string SearchTaskUserIdError = "Error searching tasks for user {UserId}";
@@ -76,7 +73,6 @@ namespace TaskManager.Helpers
             public const string FetchTaskCount = "Fetching all tasks (for count summary)";
             public const string FetchpaginatedTaskError = "Error fetching paginated tasks";
             public const string FetchpaginatedTask = "Fetching paginated tasks: Page {PageNumber}, PageSize {PageSize}";
-
             public const string FetchTask = "Fetching tasks for user {UserId}";
             public const string FetchTaskuseridError = "Error fetching tasks for user {UserId}";
             public const string FetchTypeListError = "Error fetching type list";
@@ -85,27 +81,15 @@ namespace TaskManager.Helpers
             public const string FetchPriorityList= "Fetching priority list";
             public const string FetchStatusListError = "Error fetching status list";
             public const string FetchStatusList = "Fetching status list";
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            public const string TaskUpdatedId = "Task with Id {TaskId} updated successfully";
+            public const string TaskUpdatedIdError = "Error updating task with Id {TaskId}";
+            public const string TaskUpdateNotFound = "Update failed: task with Id {TaskId} not found";
+            public const string AttemptTaskUpdateId = "Attempting to update task with Id {TaskId}";
+            public const string TaskDeletedId = "Task with Id {TaskId} deleted successfully";
+            public const string TaskDeletedIdError = "Error deleting task with Id {TaskId}";
+            public const string TaskDeletedNotFound = "Delete failed: task with Id {TaskId} not found";
+            public const string AttemptTaskDeletedId = "Attempting to delete task with Id {TaskId}";
+            public const string AttemptTaskCreateId = "Attempting to create task for user {UserId}";
 
 
         }
