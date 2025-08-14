@@ -214,14 +214,14 @@ var assemblies = [
     "name": "FileParser",
     "classes": [
       { "name": "TaskManager.Services.FileUpload.Factories.ParserFactory", "rp": "FileParser_ParserFactory.html", "cl": 0, "ucl": 12, "cal": 12, "tl": 32, "cb": 0, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "TaskManager.Services.FileUpload.Models.ParsedTask", "rp": "FileParser_ParsedTask.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Services.FileUpload.Models.ParsedTask", "rp": "FileParser_ParsedTask.html", "cl": 6, "ucl": 1, "cal": 7, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Services.FileUpload.Parsers.ExcelTaskDataParser", "rp": "FileParser_ExcelTaskDataParser.html", "cl": 0, "ucl": 40, "cal": 40, "tl": 72, "cb": 0, "tb": 38, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "TaskManager.Services.FileUpload.Services.TaskUploadService", "rp": "FileParser_TaskUploadService.html", "cl": 0, "ucl": 24, "cal": 24, "tl": 61, "cb": 0, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Services.FileUpload.Services.TaskUploadService", "rp": "FileParser_TaskUploadService.html", "cl": 0, "ucl": 14, "cal": 14, "tl": 61, "cb": 0, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
     "name": "TaskManager",
     "classes": [
-      { "name": "AuthService.Controllers.TasksController", "rp": "TaskManager_TasksController.html", "cl": 204, "ucl": 0, "cal": 204, "tl": 144, "cb": 171, "tb": 200, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "AuthService.Controllers.TasksController", "rp": "TaskManager_TasksController.html", "cl": 77, "ucl": 0, "cal": 77, "tl": 144, "cb": 20, "tb": 20, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "AuthService.Controllers.UsersController", "rp": "TaskManager_UsersController.html", "cl": 46, "ucl": 0, "cal": 46, "tl": 94, "cb": 16, "tb": 16, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "AuthService.Data.AppDbContext", "rp": "TaskManager_AppDbContext.html", "cl": 0, "ucl": 6, "cal": 6, "tl": 20, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "AuthService.Data.AppDbContextFactory", "rp": "TaskManager_AppDbContextFactory.html", "cl": 0, "ucl": 12, "cal": 12, "tl": 32, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
@@ -231,10 +231,14 @@ var assemblies = [
       { "name": "Program", "rp": "TaskManager_Program.html", "cl": 0, "ucl": 45, "cal": 45, "tl": 90, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "RegisterRequest", "rp": "TaskManager_RegisterRequest.html", "cl": 3, "ucl": 1, "cal": 4, "tl": 7, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskItem", "rp": "TaskManager_TaskItem.html", "cl": 11, "ucl": 0, "cal": 11, "tl": 26, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "TaskManager.DTOs.TaskImport", "rp": "TaskManager_TaskImport.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 24, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "TaskManager.DTOs.TaskParseResult", "rp": "TaskManager_TaskParseResult.html", "cl": 2, "ucl": 1, "cal": 3, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Controllers.TasksController", "rp": "TaskManager_TasksController.2.html", "cl": 77, "ucl": 0, "cal": 77, "tl": 144, "cb": 20, "tb": 20, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Controllers.UsersController", "rp": "TaskManager_UsersController.2.html", "cl": 46, "ucl": 0, "cal": 46, "tl": 94, "cb": 16, "tb": 16, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Data.AppDbContext", "rp": "TaskManager_AppDbContext.2.html", "cl": 0, "ucl": 6, "cal": 6, "tl": 20, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Data.AppDbContextFactory", "rp": "TaskManager_AppDbContextFactory.2.html", "cl": 0, "ucl": 12, "cal": 12, "tl": 32, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.DTOs.TaskImport", "rp": "TaskManager_TaskImport.html", "cl": 5, "ucl": 2, "cal": 7, "tl": 24, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.DTOs.TaskParseResult", "rp": "TaskManager_TaskParseResult.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.DTOs.TaskStatusCount", "rp": "TaskManager_TaskStatusCount.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 9, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "TaskManager.DTOs.UploadResponseData", "rp": "TaskManager_UploadResponseData.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.DTOs.UploadResponseData", "rp": "TaskManager_UploadResponseData.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Extensions.AuthExtensions", "rp": "TaskManager_AuthExtensions.html", "cl": 0, "ucl": 21, "cal": 21, "tl": 37, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Extensions.CorsExtensions", "rp": "TaskManager_CorsExtensions.html", "cl": 0, "ucl": 17, "cal": 17, "tl": 29, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Extensions.SwaggerExtensions", "rp": "TaskManager_SwaggerExtensions.html", "cl": 0, "ucl": 30, "cal": 30, "tl": 42, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
@@ -244,12 +248,14 @@ var assemblies = [
       { "name": "TaskManager.Helpers.SmtpSettings", "rp": "TaskManager_SmtpSettings.html", "cl": 0, "ucl": 6, "cal": 6, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Helpers.TaskNotificationSettings", "rp": "TaskManager_TaskNotificationSettings.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 9, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Models.EmailMessage", "rp": "TaskManager_EmailMessage.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 10, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Models.Status", "rp": "TaskManager_Status.2.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 11, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Models.TaskPriority", "rp": "TaskManager_TaskPriority.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 13, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Models.TaskType", "rp": "TaskManager_TaskType.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Models.User", "rp": "TaskManager_User.2.html", "cl": 5, "ucl": 1, "cal": 6, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Services.EmailService", "rp": "TaskManager_EmailService.html", "cl": 0, "ucl": 20, "cal": 20, "tl": 40, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "TaskManager.Services.TaskService", "rp": "TaskManager_TaskService.html", "cl": 0, "ucl": 328, "cal": 328, "tl": 343, "cb": 0, "tb": 140, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Services.TaskService", "rp": "TaskManager_TaskService.html", "cl": 0, "ucl": 232, "cal": 232, "tl": 343, "cb": 0, "tb": 54, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManager.Services.TaskStateService", "rp": "TaskManager_TaskStateService.html", "cl": 0, "ucl": 51, "cal": 51, "tl": 90, "cb": 0, "tb": 38, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "TaskManager.Services.UserService", "rp": "TaskManager_UserService.html", "cl": 0, "ucl": 156, "cal": 156, "tl": 184, "cb": 0, "tb": 28, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "TaskManager.Services.UserService", "rp": "TaskManager_UserService.html", "cl": 0, "ucl": 111, "cal": 111, "tl": 184, "cb": 0, "tb": 16, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TaskManagerSystemAPI.Middlewares.ExceptionHandlingMiddleware", "rp": "TaskManager_ExceptionHandlingMiddleware.html", "cl": 0, "ucl": 23, "cal": 23, "tl": 45, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "TokenResponse", "rp": "TaskManager_TokenResponse.html", "cl": 2, "ucl": 1, "cal": 3, "tl": 6, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
@@ -278,19 +284,7 @@ var riskHotspots = [
       { "value": 30, "exceeded": true },
     ]},
   {
-    "assembly": "TaskManager", "class": "TaskManager.Services.TaskService", "reportPath": "TaskManager_TaskService.html", "methodName": "CreateTaskAsync()", "methodShortName": "CreateTaskAsync()", "fileIndex": 0, "line": 23,
-    "metrics": [
-      { "value": 420, "exceeded": true },
-      { "value": 20, "exceeded": true },
-    ]},
-  {
     "assembly": "TaskManager", "class": "TaskManager.Services.TaskService", "reportPath": "TaskManager_TaskService.html", "methodName": "CreateTaskAsync()", "methodShortName": "CreateTaskAsync()", "fileIndex": 0, "line": 26,
-    "metrics": [
-      { "value": 420, "exceeded": true },
-      { "value": 20, "exceeded": true },
-    ]},
-  {
-    "assembly": "TaskManager", "class": "TaskManager.Services.TaskService", "reportPath": "TaskManager_TaskService.html", "methodName": "CreateTaskAsync()", "methodShortName": "CreateTaskAsync()", "fileIndex": 0, "line": 32,
     "metrics": [
       { "value": 420, "exceeded": true },
       { "value": 20, "exceeded": true },
@@ -302,19 +296,7 @@ var riskHotspots = [
       { "value": 18, "exceeded": true },
     ]},
   {
-    "assembly": "TaskManager", "class": "TaskManager.Services.TaskService", "reportPath": "TaskManager_TaskService.html", "methodName": "UploadTasksAsync()", "methodShortName": "UploadTasksAsync()", "fileIndex": 0, "line": 271,
-    "metrics": [
-      { "value": 342, "exceeded": true },
-      { "value": 18, "exceeded": true },
-    ]},
-  {
     "assembly": "FileParser", "class": "TaskManager.Services.FileUpload.Parsers.ExcelTaskDataParser", "reportPath": "FileParser_ExcelTaskDataParser.html", "methodName": "validateFile()", "methodShortName": "validateFile()", "fileIndex": 0, "line": 54,
-    "metrics": [
-      { "value": 72, "exceeded": true },
-      { "value": 8, "exceeded": false },
-    ]},
-  {
-    "assembly": "TaskManager", "class": "TaskManager.Services.TaskService", "reportPath": "TaskManager_TaskService.html", "methodName": "UpdateTaskAsync()", "methodShortName": "UpdateTaskAsync()", "fileIndex": 0, "line": 95,
     "metrics": [
       { "value": 72, "exceeded": true },
       { "value": 8, "exceeded": false },
@@ -326,13 +308,13 @@ var riskHotspots = [
       { "value": 8, "exceeded": false },
     ]},
   {
-    "assembly": "TaskManager", "class": "TaskManager.Services.TaskService", "reportPath": "TaskManager_TaskService.html", "methodName": "UpdateTaskAsync()", "methodShortName": "UpdateTaskAsync()", "fileIndex": 0, "line": 104,
+    "assembly": "TaskManager", "class": "TaskManager.Services.TaskStateService", "reportPath": "TaskManager_TaskStateService.html", "methodName": ".ctor(AuthService.Data.AppDbContext,Microsoft.Extensions.Logging.ILogger`1<TaskManager.Services.TaskStateService>,TaskManager.Interfaces.IEmailService,Microsoft.Extensions.Options.IOptions`1<TaskManager.Helpers.TaskNotificationSettings>)", "methodShortName": ".ctor(...)", "fileIndex": 0, "line": 19,
     "metrics": [
       { "value": 72, "exceeded": true },
       { "value": 8, "exceeded": false },
     ]},
   {
-    "assembly": "TaskManager", "class": "TaskManager.Services.TaskStateService", "reportPath": "TaskManager_TaskStateService.html", "methodName": ".ctor(AuthService.Data.AppDbContext,Microsoft.Extensions.Logging.ILogger`1<TaskManager.Services.TaskStateService>,TaskManager.Interfaces.IEmailService,Microsoft.Extensions.Options.IOptions`1<TaskManager.Helpers.TaskNotificationSettings>)", "methodShortName": ".ctor(...)", "fileIndex": 0, "line": 19,
+    "assembly": "TaskManager", "class": "TaskManager.Services.TaskStateService", "reportPath": "TaskManager_TaskStateService.html", "methodName": ".ctor(TaskManager.Data.AppDbContext,Microsoft.Extensions.Logging.ILogger`1<TaskManager.Services.TaskStateService>,TaskManager.Interfaces.IEmailService,Microsoft.Extensions.Options.IOptions`1<TaskManager.Helpers.TaskNotificationSettings>)", "methodShortName": ".ctor(...)", "fileIndex": 0, "line": 19,
     "metrics": [
       { "value": 72, "exceeded": true },
       { "value": 8, "exceeded": false },
@@ -350,13 +332,7 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "TaskManager", "class": "TaskManager.Services.TaskService", "reportPath": "TaskManager_TaskService.html", "methodName": ".ctor(AuthService.Data.AppDbContext,Microsoft.Extensions.Logging.ILogger`1<TaskManager.Services.TaskService>,TaskManager.Interfaces.IUserService)", "methodShortName": ".ctor(...)", "fileIndex": 0, "line": 22,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "TaskManager", "class": "TaskManager.Services.UserService", "reportPath": "TaskManager_UserService.html", "methodName": ".ctor(System.Net.Http.HttpClient,AuthService.Data.AppDbContext,Microsoft.Extensions.Logging.ILogger`1<TaskManager.Services.UserService>)", "methodShortName": ".ctor(...)", "fileIndex": 0, "line": 16,
+    "assembly": "TaskManager", "class": "TaskManager.Services.TaskService", "reportPath": "TaskManager_TaskService.html", "methodName": ".ctor(TaskManager.Data.AppDbContext,Microsoft.Extensions.Logging.ILogger`1<TaskManager.Services.TaskService>,TaskManager.Interfaces.IUserService)", "methodShortName": ".ctor(...)", "fileIndex": 0, "line": 16,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
@@ -368,22 +344,10 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "TaskManager", "class": "AuthService.Controllers.TasksController", "reportPath": "TaskManager_TasksController.html", "methodName": "UploadJson()", "methodShortName": "UploadJson()", "fileIndex": 0, "line": 86,
+    "assembly": "TaskManager", "class": "TaskManager.Services.UserService", "reportPath": "TaskManager_UserService.html", "methodName": ".ctor(System.Net.Http.HttpClient,TaskManager.Data.AppDbContext,Microsoft.Extensions.Logging.ILogger`1<TaskManager.Services.UserService>)", "methodShortName": ".ctor(...)", "fileIndex": 0, "line": 17,
     "metrics": [
-      { "value": 22, "exceeded": false },
-      { "value": 22, "exceeded": true },
-    ]},
-  {
-    "assembly": "TaskManager", "class": "AuthService.Controllers.TasksController", "reportPath": "TaskManager_TasksController.html", "methodName": "UploadJson()", "methodShortName": "UploadJson()", "fileIndex": 0, "line": 85,
-    "metrics": [
-      { "value": 22, "exceeded": false },
-      { "value": 22, "exceeded": true },
-    ]},
-  {
-    "assembly": "TaskManager", "class": "AuthService.Controllers.TasksController", "reportPath": "TaskManager_TasksController.html", "methodName": "UploadJson()", "methodShortName": "UploadJson()", "fileIndex": 0, "line": 88,
-    "metrics": [
-      { "value": 25, "exceeded": false },
-      { "value": 22, "exceeded": true },
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
     ]},
 ];
 

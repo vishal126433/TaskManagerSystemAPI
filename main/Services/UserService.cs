@@ -1,5 +1,5 @@
-﻿using AuthService.Data;
-using AuthService.Models;
+﻿using TaskManager.Data;
+using TaskManager.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

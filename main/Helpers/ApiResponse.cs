@@ -1,6 +1,6 @@
 ﻿
 
-using AuthService.Models;
+using TaskManager.Models;
 
 namespace TaskManager.Helpers
 {

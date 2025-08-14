@@ -1,4 +1,4 @@
-﻿using AuthService.Data;
+﻿using TaskManager.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TaskManager.DTOs;

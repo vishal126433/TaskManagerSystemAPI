@@ -9,7 +9,7 @@ using TaskManager.Services;
 using TaskManager.Helpers;
 //using TaskManager.Services.Notifications;
 using TaskManagerSystemAPI.Middlewares;
-using AuthService.Data;
+using TaskManager.Data;
 using Serilog;
 using Serilog.Events;
 //using TaskManager.Services.Tasks.FileUpload;

@@ -1,7 +1,7 @@
 ﻿using Xunit;
 using Moq;
 using TaskManager.Interfaces;
-using AuthService.Controllers;
+using TaskManager.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TaskManager.Services.FileUpload.Interfaces;
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Text.Json;
 using System.Linq;
-using AuthService.Models;
+using TaskManager.Models;
 using System.Text;
 using TaskManager.Services.FileUpload.Models;
 

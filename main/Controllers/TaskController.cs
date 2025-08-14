@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AuthService.Models;
-using AuthService.Data;
+using TaskManager.Models;
+using TaskManager.Data;
 using TaskManager.Services;
 using TaskManager.Interfaces;
 using TaskManager.Services.FileUpload.Interfaces;
 using TaskManager.DTOs;
 using TaskManager.Helpers;
 
-namespace AuthService.Controllers
+namespace TaskManager.Controllers
 {
     [ApiController]
     [Route("[controller]")]

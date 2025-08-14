@@ -1,12 +1,12 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using AuthService.Models;
-using AuthService.Data;
+using TaskManager.Models;
+using TaskManager.Data;
 using TaskManager.Interfaces;
 using TaskManager.Helpers;
 
-namespace AuthService.Controllers
+namespace TaskManager.Controllers
 {
     [ApiController]
     [Route("[controller]")]

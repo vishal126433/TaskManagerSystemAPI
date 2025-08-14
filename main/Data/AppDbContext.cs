@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using AuthService.Models;
+using TaskManager.Models;
 using TaskManager.Models;
 
-namespace AuthService.Data
+namespace TaskManager.Data
 {
     public class AppDbContext : DbContext
     {
