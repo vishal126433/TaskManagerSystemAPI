@@ -10,7 +10,7 @@ using TaskManager.Helpers;
 namespace TaskManager.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route(ApiTaskEndPoint.BaseApi)]
     public class TasksController : ControllerBase
     {
         private readonly ITaskUploadService _taskUploadService;
@@ -26,35 +26,35 @@ namespace TaskManager.Controllers
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
-        [HttpPost("create/{userId}")]
+        [HttpPost(ApiTaskEndPoint.Create)]
         public async Task<IActionResult> CreateTask(int userId, [FromBody] TaskItem task)
         {
             var createdTask = await _taskService.CreateTaskAsync(userId, task);
             return Ok(ApiResponse<object>.SuccessResponse(createdTask, 200, ResponseMessages.Message.TaskCreated));
         }
 
-        [HttpGet("statuslist")]
+        [HttpGet(ApiTaskEndPoint.StatusList)]
         public async Task<IActionResult> GetStatusList()
         {
             var statusList = await _taskService.GetStatusListAsync();
             return Ok(ApiResponse<object>.SuccessResponse(statusList));
         }
 
-        [HttpGet("prioritylist")]
+        [HttpGet(ApiTaskEndPoint.PriorityList)]
         public async Task<IActionResult> GetPriorityList()
         {
             var priorityList = await _taskService.GetPriorityListAsync();
             return Ok(ApiResponse<object>.SuccessResponse(priorityList));
         }
 
-        [HttpGet("typelist")]
+        [HttpGet(ApiTaskEndPoint.TypeList)]
         public async Task<IActionResult> GetTypeList()
         {
             var typeList = await _taskService.GetTypeListAsync();
             return Ok(ApiResponse<object>.SuccessResponse(typeList));
         }
 
-        [HttpGet("search")]
+        [HttpGet(ApiTaskEndPoint.Search)]
         public async Task<IActionResult> SearchTasks(int userId, string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -64,7 +64,7 @@ namespace TaskManager.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(tasks));
         }
 
-        [HttpGet("searchTasks")]
+        [HttpGet(ApiTaskEndPoint.SearchTasks)]
         public async Task<IActionResult> SearchTasks(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -74,7 +74,7 @@ namespace TaskManager.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(tasks));
         }
 
-        [HttpPost("upload-json")]
+        [HttpPost(ApiTaskEndPoint.UploadJson)]
         public async Task<IActionResult> UploadJson([FromBody] List<TaskImport> tasks)
         {
             if (tasks == null || !tasks.Any())
@@ -85,7 +85,7 @@ namespace TaskManager.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(result));
         }
 
-        [HttpPost("upload")]
+        [HttpPost(ApiTaskEndPoint.Upload)]
         public async Task<IActionResult> Upload(IFormFile file)
         {
             var parsedTasks = await _taskUploadService.ParseTasksFromFileAsync(file);
@@ -134,7 +134,7 @@ namespace TaskManager.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(result, 200, ResponseMessages.Message.TaskUpdated));
         }
 
-        [HttpPost("run")]
+        [HttpPost(ApiTaskEndPoint.Run)]
         public async Task<IActionResult> RunDueDateCheck(CancellationToken cancellationToken)
         {
             await _taskStateService.UpdateTaskStatesAsync(cancellationToken);

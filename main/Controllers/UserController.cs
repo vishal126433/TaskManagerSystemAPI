@@ -9,7 +9,7 @@ using TaskManager.Helpers;
 namespace TaskManager.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route(ApiUserEndPoint.BaseApi)]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -19,7 +19,7 @@ namespace TaskManager.Controllers
             _userService = userService ?? throw new InvalidOperationException(ResponseMessages.Message.NoUserServiceInitialised);
         }
 
-        [HttpPost("refresh-token")]
+        [HttpPost(ApiUserEndPoint.RefreshToken)]
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
@@ -38,7 +38,7 @@ namespace TaskManager.Controllers
             return Ok(ApiResponse<object>.SuccessResponse(users));
         }
 
-        [HttpPost("toggle-active/{id}")]
+        [HttpPost(ApiUserEndPoint.ToggleActive)]
         public async Task<IActionResult> ToggleActiveStatus(int id)
         {
             var result = await _userService.ToggleUserActiveStatusAsync(id);
@@ -50,7 +50,7 @@ namespace TaskManager.Controllers
 
 
         [Authorize(Roles = "Admin")]
-        [HttpPost("create")]
+        [HttpPost(ApiUserEndPoint.Create)]
         public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Username) ||
